@@ -76,7 +76,6 @@ class App extends Component<object, State> {
   }
 
   render() {
-    console.log(this.state.searchResults.results);
     return (
       <div className="App">
         <Search

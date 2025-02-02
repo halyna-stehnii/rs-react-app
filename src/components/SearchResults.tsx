@@ -7,8 +7,6 @@ interface SearchResultsProps {
 
 class SearchResults extends React.Component<SearchResultsProps> {
   render() {
-    console.log('SearchResults ', this.props.searchResults);
-
     return (
       <div>
         <h2>Search Results</h2>
