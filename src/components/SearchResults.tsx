@@ -10,9 +10,9 @@ class SearchResults extends React.Component<SearchResultsProps> {
     console.log('SearchResults ', this.props.searchResults);
 
     return (
-      <div className="bottom-section">
+      <div>
         <h2>Search Results</h2>
-        <ul>
+        <ul className="search-results">
           {this.props.searchResults.results.map((result, index) => (
             <li key={index}>
               <div>Name: {result.name}</div>

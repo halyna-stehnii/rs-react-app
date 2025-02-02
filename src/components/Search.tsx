@@ -11,6 +11,7 @@ class Search extends Component<SearchProps> {
     return (
       <div>
         <input
+          className="search-input"
           type="text"
           value={this.props.searchTerm}
           onChange={this.props.onSearchChange}
