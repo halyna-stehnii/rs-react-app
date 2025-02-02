@@ -1,5 +1,6 @@
-import { Component } from 'react';
+import { Component, ChangeEvent } from 'react';
 import SearchResults from './components/SearchResults';
+import Search from './components/Search';
 import './App.css';
 
 export type SearchResult = {
@@ -42,11 +43,27 @@ class App extends Component<object, State> {
   }
 
   componentDidMount() {
-    this.fetchSearchResults();
+    const savedSearchTerm = localStorage.getItem('searchTerm');
+    if (savedSearchTerm) {
+      this.setState({ searchTerm: savedSearchTerm });
+      this.fetchSearchResults(savedSearchTerm);
+    } else {
+      this.fetchSearchResults();
+    }
   }
+  handleSearchInputChange = (event: ChangeEvent<HTMLInputElement>) => {
+    this.setState({ searchTerm: event.target.value });
+  };
 
-  fetchSearchResults() {
-    const searchUrl = 'https://swapi.dev/api/people/';
+  handleSearch = () => {
+    const trimmedSearchTerm = this.state.searchTerm.trim();
+    this.fetchSearchResults(trimmedSearchTerm);
+    localStorage.setItem('searchTerm', trimmedSearchTerm);
+  };
+
+  fetchSearchResults(searchTerm = '') {
+    const apiBaseUrl = 'https://swapi.dev/api/people/';
+    const searchUrl = `${apiBaseUrl}/?search=${searchTerm}`;
 
     fetch(searchUrl)
       .then((response) => response.json())
@@ -62,6 +79,11 @@ class App extends Component<object, State> {
     console.log(this.state.searchResults.results);
     return (
       <div className="App">
+        <Search
+          searchTerm={this.state.searchTerm}
+          onSearchChange={this.handleSearchInputChange}
+          onSearch={this.handleSearch}
+        />
         <SearchResults searchResults={this.state.searchResults} />
       </div>
     );
