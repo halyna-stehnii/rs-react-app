@@ -1,35 +1,71 @@
-import { useState } from 'react';
-import reactLogo from './assets/react.svg';
-import viteLogo from '/vite.svg';
+import { Component } from 'react';
+import SearchResults from './components/SearchResults';
 import './App.css';
 
-function App() {
-  const [count, setCount] = useState(0);
+export type SearchResult = {
+  count: number;
+  next: string;
+  previous: string;
+  results: Person[];
+};
 
-  return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank" rel="noreferrer">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank" rel="noreferrer">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
+export type Person = {
+  birth_year: string;
+  created: string;
+  edited: string;
+  eye_color: string;
+  films: string[];
+  gender: string;
+  hair_color: string;
+  height: string;
+  homeworld: string;
+  mass: string;
+  name: string;
+  skin_color: string;
+  species: string[];
+  starships: string[];
+  vehicles: string[];
+};
+
+interface State {
+  searchTerm: string;
+  searchResults: SearchResult;
+}
+
+class App extends Component<object, State> {
+  constructor(props: object) {
+    super(props);
+    this.state = {
+      searchTerm: '',
+      searchResults: { count: 0, next: '', previous: '', results: [] },
+    };
+  }
+
+  componentDidMount() {
+    this.fetchSearchResults();
+  }
+
+  fetchSearchResults() {
+    const searchUrl = 'https://swapi.dev/api/people/';
+
+    fetch(searchUrl)
+      .then((response) => response.json())
+      .then((data) => {
+        this.setState({ searchResults: data });
+      })
+      .catch((error) => {
+        console.error('Error fetching search results', error);
+      });
+  }
+
+  render() {
+    console.log(this.state.searchResults.results);
+    return (
+      <div className="App">
+        <SearchResults searchResults={this.state.searchResults} />
       </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  );
+    );
+  }
 }
 
 export default App;
