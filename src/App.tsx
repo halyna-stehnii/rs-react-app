@@ -32,6 +32,7 @@ export type Person = {
 interface State {
   searchTerm: string;
   searchResults: SearchResult;
+  isLoading: boolean;
 }
 
 class App extends Component<object, State> {
@@ -40,6 +41,7 @@ class App extends Component<object, State> {
     this.state = {
       searchTerm: '',
       searchResults: { count: 0, next: '', previous: '', results: [] },
+      isLoading: false,
     };
   }
 
@@ -66,13 +68,16 @@ class App extends Component<object, State> {
     const apiBaseUrl = 'https://swapi.dev/api/people/';
     const searchUrl = `${apiBaseUrl}/?search=${searchTerm}`;
 
+    this.setState({ isLoading: true });
+
     fetch(searchUrl)
       .then((response) => response.json())
       .then((data) => {
-        this.setState({ searchResults: data });
+        this.setState({ searchResults: data, isLoading: false });
       })
       .catch((error) => {
         console.error('Error fetching search results', error);
+        this.setState({ isLoading: false });
       });
   }
 
@@ -85,7 +90,11 @@ class App extends Component<object, State> {
             onSearchChange={this.handleSearchInputChange}
             onSearch={this.handleSearch}
           />
-          <SearchResults searchResults={this.state.searchResults} />
+          {this.state.isLoading ? (
+            <div className="loader"></div>
+          ) : (
+            <SearchResults searchResults={this.state.searchResults} />
+          )}
           <button
             onClick={() => {
               throw new Error('Test error!');
