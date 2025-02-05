@@ -46,3 +46,26 @@
     transform: rotate(360deg);
   }
 }
+
+.error-boundary {
+  text-align: center;
+  padding: 20px;
+  margin: 20px;
+  border: 2px solid #ff0000;
+  border-radius: 8px;
+  background-color: #fff0f0;
+}
+
+.error-button {
+  padding: 10px 20px;
+  background-color: #ff4444;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-top: 10px;
+}
+
+.error-button:hover {
+  background-color: #ff0000;
+}

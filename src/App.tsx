@@ -32,6 +32,7 @@ interface State {
   searchTerm: string;
   searchResults: SearchResult;
   isLoading: boolean;
+  hasError: boolean;
 }
 
 class App extends Component<object, State> {
@@ -41,6 +42,7 @@ class App extends Component<object, State> {
       searchTerm: '',
       searchResults: { count: 0, next: '', previous: '', results: [] },
       isLoading: false,
+      hasError: false,
     };
   }
 
@@ -81,6 +83,10 @@ class App extends Component<object, State> {
   }
 
   render() {
+    if (this.state.hasError) {
+      throw new Error('Test error!');
+    }
+
     return (
       <div className="App">
         <Search
@@ -95,7 +101,7 @@ class App extends Component<object, State> {
         )}
         <button
           onClick={() => {
-            throw new Error('Test error!');
+            this.setState({ hasError: true });
           }}
         >
           Throw Error
