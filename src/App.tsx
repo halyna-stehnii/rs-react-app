@@ -2,7 +2,6 @@ import { Component, ChangeEvent } from 'react';
 import SearchResults from './components/SearchResults';
 import Search from './components/Search';
 import './App.css';
-import ErrorBoundary from './components/ErrorBoundary';
 
 export type SearchResult = {
   count: number;
@@ -83,27 +82,25 @@ class App extends Component<object, State> {
 
   render() {
     return (
-      <ErrorBoundary>
-        <div className="App">
-          <Search
-            searchTerm={this.state.searchTerm}
-            onSearchChange={this.handleSearchInputChange}
-            onSearch={this.handleSearch}
-          />
-          {this.state.isLoading ? (
-            <div className="loader"></div>
-          ) : (
-            <SearchResults searchResults={this.state.searchResults} />
-          )}
-          <button
-            onClick={() => {
-              throw new Error('Test error!');
-            }}
-          >
-            Throw Error
-          </button>
-        </div>
-      </ErrorBoundary>
+      <div className="App">
+        <Search
+          searchTerm={this.state.searchTerm}
+          onSearchChange={this.handleSearchInputChange}
+          onSearch={this.handleSearch}
+        />
+        {this.state.isLoading ? (
+          <div className="loader"></div>
+        ) : (
+          <SearchResults searchResults={this.state.searchResults} />
+        )}
+        <button
+          onClick={() => {
+            throw new Error('Test error!');
+          }}
+        >
+          Throw Error
+        </button>
+      </div>
     );
   }
 }
