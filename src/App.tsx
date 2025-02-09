@@ -60,12 +60,9 @@ const App = () => {
       fetch(searchUrl)
         .then((response) => {
           if (!response.ok) {
-            // If page not found, reset to page 1
-            if (response.status === 404 && page > 1) {
-              const params = new URLSearchParams(searchParams);
-              params.delete('page');
-              setSearchParams(params);
-              fetchSearchResults(term, 1);
+            if (response.status === 404) {
+              // Navigate to NotFound for invalid pages
+              navigate('/not-found');
               return;
             }
             throw new Error('Network response was not ok');
@@ -74,6 +71,12 @@ const App = () => {
         })
         .then((data: SearchResult | undefined) => {
           if (data) {
+            // Check if the requested page is beyond available pages
+            const totalPages = Math.ceil(data.count / 10);
+            if (page > totalPages) {
+              navigate('/not-found');
+              return;
+            }
             setSearchResults({
               count: data.count,
               next: data.next || '',
@@ -94,7 +97,7 @@ const App = () => {
           });
         });
     },
-    [searchParams, setSearchParams]
+    [navigate]
   );
 
   useEffect(() => {
