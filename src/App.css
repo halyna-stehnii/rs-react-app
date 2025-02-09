@@ -69,3 +69,42 @@
 .error-button:hover {
   background-color: #ff0000;
 }
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+  margin: 2rem 0;
+}
+
+.pagination-button {
+  padding: 0.5rem 1rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  background-color: #fff;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.pagination-button:hover:not(:disabled) {
+  background-color: #f0f0f0;
+  border-color: #999;
+}
+
+.pagination-button:disabled {
+  background-color: #f0f0f0;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.page-info {
+  font-size: 0.9rem;
+  color: #666;
+}
+
+.results-count {
+  color: #666;
+  text-align: center;
+  margin-bottom: 1rem;
+}

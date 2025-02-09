@@ -1,15 +1,8 @@
-import { createRoot } from 'react-dom/client';
+import ReactDOM from 'react-dom/client';
+import AppRouter from './AppRouter';
 import './index.css';
-import App from './App.tsx';
-import ErrorBoundary from './components/ErrorBoundary.tsx';
 
 const rootElement = document.getElementById('root');
-if (!rootElement) {
-  throw new Error('Failed to find root element');
-}
+if (!rootElement) throw new Error('Failed to find root element');
 
-createRoot(rootElement).render(
-  <ErrorBoundary>
-    <App />
-  </ErrorBoundary>
-);
+ReactDOM.createRoot(rootElement).render(<AppRouter />);

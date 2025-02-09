@@ -1,4 +1,5 @@
 import { useState, useEffect, ChangeEvent } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import SearchResults from './components/SearchResults';
 import Search from './components/Search';
 import './App.css';
@@ -29,6 +30,8 @@ export type Person = {
 };
 
 const App = () => {
+  const [searchParams, setSearchParams] = useSearchParams();
+
   const [searchTerm, setSearchTerm] = useState('');
   const [searchResults, setSearchResults] = useState<SearchResult>({
     count: 0,
@@ -39,15 +42,41 @@ const App = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [hasError, setHasError] = useState(false);
 
+  const currentPage = Number(searchParams.get('page')) || 1;
+
+  const updateURL = (search: string, page: number) => {
+    const params = new URLSearchParams();
+    if (search) params.set('search', search);
+    if (page > 1) params.set('page', page.toString());
+    setSearchParams(params);
+  };
+
   useEffect(() => {
+    const updateURLAndFetch = (search: string, page: number) => {
+      const params = new URLSearchParams();
+      if (search) params.set('search', search);
+      if (page > 1) params.set('page', page.toString());
+      setSearchParams(params);
+      fetchSearchResults(search, page);
+    };
+
     const savedSearchTerm = localStorage.getItem('searchTerm');
-    if (savedSearchTerm) {
+    const urlSearchTerm = searchParams.get('search') || '';
+    const urlPage = Number(searchParams.get('page')) || 1;
+
+    if (urlSearchTerm || urlPage > 1) {
+      // If we have URL parameters, use them
+      setSearchTerm(urlSearchTerm);
+      fetchSearchResults(urlSearchTerm, urlPage);
+    } else if (savedSearchTerm) {
+      // If no URL parameters but we have saved search, use that
       setSearchTerm(savedSearchTerm);
-      fetchSearchResults(savedSearchTerm);
+      updateURLAndFetch(savedSearchTerm, 1);
     } else {
-      fetchSearchResults();
+      // Default case: empty search, first page
+      fetchSearchResults('', 1);
     }
-  }, []);
+  }, [searchParams, setSearchParams]);
 
   const handleSearchInputChange = (event: ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(event.target.value);
@@ -55,20 +84,40 @@ const App = () => {
 
   const handleSearch = () => {
     const trimmedSearchTerm = searchTerm.trim();
-    fetchSearchResults(trimmedSearchTerm);
+    updateURL(trimmedSearchTerm, 1);
+    fetchSearchResults(trimmedSearchTerm, 1);
     localStorage.setItem('searchTerm', trimmedSearchTerm);
   };
 
-  const fetchSearchResults = (term = '') => {
-    const apiBaseUrl = 'https://swapi.dev/api/people/';
-    const searchUrl = `${apiBaseUrl}/?search=${term}`;
+  const handlePageChange = (newPage: number) => {
+    updateURL(searchTerm, newPage);
+    fetchSearchResults(searchTerm, newPage);
+  };
+
+  const fetchSearchResults = (term = '', page = 1) => {
+    const apiBaseUrl = 'https://swapi.dev/api/people';
+    const params = new URLSearchParams({
+      search: term,
+      page: page.toString(),
+    });
+    const searchUrl = `${apiBaseUrl}/?${params.toString()}`;
 
     setIsLoading(true);
 
     fetch(searchUrl)
-      .then((response) => response.json())
-      .then((data) => {
-        setSearchResults(data);
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+        return response.json();
+      })
+      .then((data: SearchResult) => {
+        setSearchResults({
+          count: data.count,
+          next: data.next || '',
+          previous: data.previous || '',
+          results: data.results,
+        });
         setIsLoading(false);
       })
       .catch((error) => {
@@ -91,7 +140,11 @@ const App = () => {
       {isLoading ? (
         <div className="loader"></div>
       ) : (
-        <SearchResults searchResults={searchResults} />
+        <SearchResults
+          searchResults={searchResults}
+          currentPage={currentPage}
+          onPageChange={handlePageChange}
+        />
       )}
       <button onClick={() => setHasError(true)}>Throw Error</button>
     </div>
