@@ -1,5 +1,5 @@
-import { useState, useEffect, ChangeEvent } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useState, useEffect, ChangeEvent, useCallback } from 'react';
+import { useSearchParams, Outlet, useNavigate } from 'react-router-dom';
 import SearchResults from './components/SearchResults';
 import Search from './components/Search';
 import './App.css';
@@ -44,12 +44,58 @@ const App = () => {
 
   const currentPage = Number(searchParams.get('page')) || 1;
 
-  const updateURL = (search: string, page: number) => {
-    const params = new URLSearchParams();
-    if (search) params.set('search', search);
-    if (page > 1) params.set('page', page.toString());
-    setSearchParams(params);
-  };
+  const navigate = useNavigate();
+
+  const fetchSearchResults = useCallback(
+    (term = '', page = 1) => {
+      const apiBaseUrl = 'https://swapi.dev/api/people';
+      const params = new URLSearchParams({
+        search: term,
+        page: page.toString(),
+      });
+      const searchUrl = `${apiBaseUrl}/?${params.toString()}`;
+
+      setIsLoading(true);
+
+      fetch(searchUrl)
+        .then((response) => {
+          if (!response.ok) {
+            // If page not found, reset to page 1
+            if (response.status === 404 && page > 1) {
+              const params = new URLSearchParams(searchParams);
+              params.delete('page');
+              setSearchParams(params);
+              fetchSearchResults(term, 1);
+              return;
+            }
+            throw new Error('Network response was not ok');
+          }
+          return response.json();
+        })
+        .then((data: SearchResult | undefined) => {
+          if (data) {
+            setSearchResults({
+              count: data.count,
+              next: data.next || '',
+              previous: data.previous || '',
+              results: data.results,
+            });
+          }
+          setIsLoading(false);
+        })
+        .catch((error) => {
+          console.error('Error fetching search results', error);
+          setIsLoading(false);
+          setSearchResults({
+            count: 0,
+            next: '',
+            previous: '',
+            results: [],
+          });
+        });
+    },
+    [searchParams, setSearchParams]
+  );
 
   useEffect(() => {
     const updateURLAndFetch = (search: string, page: number) => {
@@ -76,7 +122,7 @@ const App = () => {
       // Default case: empty search, first page
       fetchSearchResults('', 1);
     }
-  }, [searchParams, setSearchParams]);
+  }, [searchParams, setSearchParams, fetchSearchResults]);
 
   const handleSearchInputChange = (event: ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(event.target.value);
@@ -84,46 +130,36 @@ const App = () => {
 
   const handleSearch = () => {
     const trimmedSearchTerm = searchTerm.trim();
-    updateURL(trimmedSearchTerm, 1);
+    const params = new URLSearchParams(searchParams);
+
+    if (trimmedSearchTerm) {
+      params.set('search', trimmedSearchTerm);
+    } else {
+      params.delete('search');
+    }
+
+    params.delete('page'); // Reset to page 1 on new search
+    setSearchParams(params);
     fetchSearchResults(trimmedSearchTerm, 1);
     localStorage.setItem('searchTerm', trimmedSearchTerm);
   };
 
   const handlePageChange = (newPage: number) => {
-    updateURL(searchTerm, newPage);
+    const params = new URLSearchParams(searchParams);
+    if (newPage > 1) {
+      params.set('page', newPage.toString());
+    } else {
+      params.delete('page'); // Remove page parameter when going back to page 1
+    }
+    setSearchParams(params);
     fetchSearchResults(searchTerm, newPage);
   };
 
-  const fetchSearchResults = (term = '', page = 1) => {
-    const apiBaseUrl = 'https://swapi.dev/api/people';
-    const params = new URLSearchParams({
-      search: term,
-      page: page.toString(),
-    });
-    const searchUrl = `${apiBaseUrl}/?${params.toString()}`;
-
-    setIsLoading(true);
-
-    fetch(searchUrl)
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error('Network response was not ok');
-        }
-        return response.json();
-      })
-      .then((data: SearchResult) => {
-        setSearchResults({
-          count: data.count,
-          next: data.next || '',
-          previous: data.previous || '',
-          results: data.results,
-        });
-        setIsLoading(false);
-      })
-      .catch((error) => {
-        console.error('Error fetching search results', error);
-        setIsLoading(false);
-      });
+  // Add this to handle background clicks
+  const handleBackgroundClick = (e: React.MouseEvent) => {
+    if (e.target === e.currentTarget) {
+      navigate('/');
+    }
   };
 
   if (hasError) {
@@ -132,21 +168,26 @@ const App = () => {
 
   return (
     <div className="App">
-      <Search
-        searchTerm={searchTerm}
-        onSearchChange={handleSearchInputChange}
-        onSearch={handleSearch}
-      />
-      {isLoading ? (
-        <div className="loader"></div>
-      ) : (
-        <SearchResults
-          searchResults={searchResults}
-          currentPage={currentPage}
-          onPageChange={handlePageChange}
-        />
-      )}
-      <button onClick={() => setHasError(true)}>Throw Error</button>
+      <div className="split-view" onClick={handleBackgroundClick}>
+        <div className="search-panel">
+          <Search
+            searchTerm={searchTerm}
+            onSearchChange={handleSearchInputChange}
+            onSearch={handleSearch}
+          />
+          {isLoading ? (
+            <div className="loader"></div>
+          ) : (
+            <SearchResults
+              searchResults={searchResults}
+              currentPage={currentPage}
+              onPageChange={handlePageChange}
+            />
+          )}
+          <button onClick={() => setHasError(true)}>Throw Error</button>
+        </div>
+        <Outlet />
+      </div>
     </div>
   );
 };
