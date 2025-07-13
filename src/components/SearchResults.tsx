@@ -1,5 +1,6 @@
 import React from 'react';
 import { SearchResult } from '../App';
+import './SearchResults.css';
 
 interface SearchResultsProps {
   searchResults: SearchResult;
@@ -8,8 +9,8 @@ interface SearchResultsProps {
 class SearchResults extends React.Component<SearchResultsProps> {
   render() {
     return (
-      <div>
-        <h2>Search Results</h2>
+      <div className="results-container">
+        <h2 className="search-title">Search Results</h2>
         <ul className="search-results">
           {this.props.searchResults.results.map((result, index) => (
             <li key={index}>

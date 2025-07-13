@@ -1,0 +1,17 @@
+.search-results li strong {
+  color: #2b2d42;
+  font-weight: 600;
+}
+
+.search-results li {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 10px;
+}
+
+.no-results {
+  text-align: center;
+  padding: 30px;
+  color: #8d99ae;
+  font-style: italic;
+}

@@ -3,9 +3,9 @@
   line-height: 1.5;
   font-weight: 400;
 
-  color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
+  color-scheme: light;
+  color: #2b2d42;
+  background-color: #edf2f4;
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
@@ -15,11 +15,12 @@
 
 a {
   font-weight: 500;
-  color: #646cff;
+  color: #2b2d42;
   text-decoration: inherit;
+  transition: color 0.2s ease;
 }
 a:hover {
-  color: #535bf2;
+  color: #8d99ae;
 }
 
 body {
@@ -30,39 +31,58 @@ body {
   min-height: 100vh;
 }
 
+h1, h2, h3, h4, h5, h6 {
+  color: #2b2d42;
+}
+
 h1 {
-  font-size: 3.2em;
+  font-size: 3em;
   line-height: 1.1;
+  margin-bottom: 1rem;
+}
+
+h2 {
+  font-size: 2em;
+  color: #2b2d42;
+  margin-bottom: 0.8rem;
 }
 
 button {
-  border-radius: 8px;
+  border-radius: 5px;
   border: 1px solid transparent;
   padding: 0.6em 1.2em;
   font-size: 1em;
   font-weight: 500;
   font-family: inherit;
-  background-color: #1a1a1a;
+  background-color: #2b2d42;
+  color: #edf2f4;
   cursor: pointer;
-  transition: border-color 0.25s;
+  transition: all 0.25s;
+  margin-top: 10px;
 }
 button:hover {
-  border-color: #646cff;
+  background-color: #8d99ae;
+  border-color: #2b2d42;
 }
 button:focus,
 button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
+  outline: 2px solid #8d99ae;
 }
 
-@media (prefers-color-scheme: light) {
-  :root {
-    color: #213547;
-    background-color: #ffffff;
-  }
-  a:hover {
-    color: #747bff;
-  }
-  button {
-    background-color: #f9f9f9;
-  }
+/* Let's add some specific styles for the search results component */
+.search-results li:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(43, 45, 66, 0.2);
+}
+
+.search-results li div {
+  margin-bottom: 5px;
+}
+
+/* We can also create a specific style for the search results title */
+h2.search-title {
+  color: #2b2d42;
+  border-bottom: 2px solid #8d99ae;
+  padding-bottom: 8px;
+  margin-bottom: 20px;
 }
