@@ -69,7 +69,6 @@ button:focus-visible {
   outline: 2px solid #8d99ae;
 }
 
-/* Let's add some specific styles for the search results component */
 .search-results li:hover {
   transform: translateY(-2px);
   box-shadow: 0 4px 8px rgba(43, 45, 66, 0.2);
@@ -79,7 +78,6 @@ button:focus-visible {
   margin-bottom: 5px;
 }
 
-/* We can also create a specific style for the search results title */
 h2.search-title {
   color: #2b2d42;
   border-bottom: 2px solid #8d99ae;
