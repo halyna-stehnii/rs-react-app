@@ -15,7 +15,7 @@ class Search extends Component<SearchProps> {
           type="text"
           value={this.props.searchTerm}
           onChange={this.props.onSearchChange}
-          placeholder="Find StarWars characters"
+          placeholder="Find Rick and Morty characters"
         />
         <button onClick={this.props.onSearch}>Search</button>
       </div>

@@ -14,7 +14,7 @@
   border-radius: 5px;
   font-size: 16px;
   outline: none;
-  background-color: #edf2f4;
+  background-color: #fff;
   color: #2b2d42;
 }
 
@@ -26,16 +26,6 @@
   list-style: none;
   padding: 0;
   margin: 0;
-}
-
-.search-results li {
-  padding: 15px;
-  border: 1px solid #8d99ae;
-  border-radius: 5px;
-  margin-top: 10px;
-  background-color: #edf2f4;
-  box-shadow: 0 2px 4px rgba(43, 45, 66, 0.1);
-  transition: all 0.2s ease;
 }
 
 .loader {

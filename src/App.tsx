@@ -11,21 +11,11 @@ export type SearchResult = {
 };
 
 export type Person = {
-  birth_year: string;
-  created: string;
-  edited: string;
-  eye_color: string;
-  films: string[];
-  gender: string;
-  hair_color: string;
-  height: string;
-  homeworld: string;
-  mass: string;
   name: string;
-  skin_color: string;
-  species: string[];
-  starships: string[];
-  vehicles: string[];
+  status: string;
+  species: string;
+  image: string;
+  episode: string[];
 };
 
 interface State {
@@ -66,8 +56,8 @@ class App extends Component<object, State> {
   };
 
   fetchSearchResults(searchTerm = '') {
-    const apiBaseUrl = 'https://swapi.dev/api/people/';
-    const searchUrl = `${apiBaseUrl}/?search=${searchTerm}`;
+    const apiBaseUrl = 'https://rickandmortyapi.com/api/character';
+    const searchUrl = `${apiBaseUrl}/?name=${searchTerm}`;
 
     this.setState({ isLoading: true });
 
