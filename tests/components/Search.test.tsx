@@ -1,7 +1,7 @@
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
-import Search from './Search';
+import Search from '../../src/components/Search';
 
 describe('Search Component', () => {
   const defaultProps = {
