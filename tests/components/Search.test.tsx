@@ -126,6 +126,44 @@ describe('Search Component', () => {
     vi.restoreAllMocks();
   });
 
+  it('overwrites existing localStorage value when new search is performed', () => {
+    const initialSearchTerm = 'Rick Sanchez';
+    const newSearchTerm = 'Summer Smith';
+
+    const localStorageMock = {
+      getItem: vi.fn().mockReturnValue(initialSearchTerm),
+      setItem: vi.fn(),
+    };
+
+    Object.defineProperty(window, 'localStorage', {
+      value: localStorageMock,
+      writable: true,
+    });
+
+    const onSearchMock = vi.fn(() => {
+      localStorage.setItem('rickAndMortySearchTerm', newSearchTerm);
+    });
+
+    render(
+      <Search
+        searchTerm={newSearchTerm}
+        onSearchChange={vi.fn()}
+        onSearch={onSearchMock}
+      />
+    );
+
+    const searchButton = screen.getByRole('button', { name: 'Search' });
+    searchButton.click();
+
+    expect(onSearchMock).toHaveBeenCalledTimes(1);
+    expect(localStorageMock.setItem).toHaveBeenCalledWith(
+      'rickAndMortySearchTerm',
+      newSearchTerm
+    );
+
+    vi.restoreAllMocks();
+  });
+
   it('triggers onSearch callback when search button is clicked', () => {
     const onSearchMock = vi.fn();
 
