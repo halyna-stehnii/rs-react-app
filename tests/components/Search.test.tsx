@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { vi } from 'vitest';
 import Search from '../../src/components/Search';
 
@@ -107,5 +107,26 @@ describe('Search Component', () => {
     searchButton.click();
 
     expect(onSearchMock).toHaveBeenCalledTimes(1);
+  });
+
+  it('triggers onSearchChange callback when user types in the input', () => {
+    const onSearchChangeMock = vi.fn();
+
+    render(
+      <Search
+        searchTerm=""
+        onSearchChange={onSearchChangeMock}
+        onSearch={vi.fn()}
+      />
+    );
+
+    const searchInput = screen.getByPlaceholderText(
+      'Find Rick and Morty characters'
+    );
+
+    const typedText = 'Rick';
+    fireEvent.change(searchInput, { target: { value: typedText } });
+
+    expect(onSearchChangeMock).toHaveBeenCalled();
   });
 });
