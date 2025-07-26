@@ -46,6 +46,31 @@ describe('Search Component', () => {
     expect(searchInput).toHaveValue('');
   });
 
+  it('displays previously saved search term from localStorage on mount', () => {
+    const savedSearchTerm = 'Rick Sanchez';
+    const localStorageMock = {
+      getItem: vi.fn().mockReturnValue(savedSearchTerm),
+      setItem: vi.fn(),
+    };
+    Object.defineProperty(window, 'localStorage', {
+      value: localStorageMock,
+    });
+
+    const propsWithSavedTerm = {
+      ...defaultProps,
+      searchTerm: savedSearchTerm,
+    };
+
+    render(<Search {...propsWithSavedTerm} />);
+
+    const searchInput = screen.getByPlaceholderText(
+      'Find Rick and Morty characters'
+    );
+    expect(searchInput).toHaveValue(savedSearchTerm);
+
+    vi.restoreAllMocks();
+  });
+
   it('triggers onSearch callback when search button is clicked', () => {
     const onSearchMock = vi.fn();
 
