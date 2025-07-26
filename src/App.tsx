@@ -52,7 +52,6 @@ class App extends Component<object, State> {
   handleSearch = () => {
     const trimmedSearchTerm = this.state.searchTerm.trim();
     this.fetchSearchResults(trimmedSearchTerm);
-    localStorage.setItem('searchTerm', trimmedSearchTerm);
   };
 
   fetchSearchResults(searchTerm = '') {
@@ -62,13 +61,24 @@ class App extends Component<object, State> {
     this.setState({ isLoading: true });
 
     fetch(searchUrl)
-      .then((response) => response.json())
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error('No results found');
+        }
+        return response.json();
+      })
       .then((data) => {
         this.setState({ searchResults: data, isLoading: false });
+        if (data.results && data.results.length > 0) {
+          localStorage.setItem('searchTerm', searchTerm);
+        }
       })
       .catch((error) => {
         console.error('Error fetching search results', error);
-        this.setState({ isLoading: false });
+        this.setState({
+          searchResults: { count: 0, next: '', previous: '', results: [] },
+          isLoading: false,
+        });
       });
   }
 

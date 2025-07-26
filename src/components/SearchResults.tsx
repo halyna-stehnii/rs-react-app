@@ -11,22 +11,26 @@ class SearchResults extends React.Component<SearchResultsProps> {
     return (
       <div className="results-container">
         <h2 className="search-title">Search Results</h2>
-        <ul className="search-results">
-          {this.props.searchResults.results.map((result, index) => (
-            <li key={index}>
-              <div className="character-container">
-                <div className="character-image">
-                  <img src={result.image} alt={result.name} />
+        {this.props.searchResults.results.length === 0 ? (
+          <div className="no-results-message">No results</div>
+        ) : (
+          <ul className="search-results">
+            {this.props.searchResults.results.map((result, index) => (
+              <li key={index}>
+                <div className="character-container">
+                  <div className="character-image">
+                    <img src={result.image} alt={result.name} />
+                  </div>
+                  <div className="character-info">
+                    <div>Name: {result.name}</div>
+                    <div>Status: {result.status}</div>
+                    <div>Species: {result.species}</div>
+                  </div>
                 </div>
-                <div className="character-info">
-                  <div>Name: {result.name}</div>
-                  <div>Status: {result.status}</div>
-                  <div>Species: {result.species}</div>
-                </div>
-              </div>
-            </li>
-          ))}
-        </ul>
+              </li>
+            ))}
+          </ul>
+        )}
       </div>
     );
   }
