@@ -66,6 +66,41 @@ describe('Search Component', () => {
     vi.restoreAllMocks();
   });
 
+  it('saves search term to localStorage when search button is clicked', () => {
+    const searchTerm = 'Morty Smith';
+    const localStorageMock = {
+      getItem: vi.fn(),
+      setItem: vi.fn(),
+    };
+    Object.defineProperty(window, 'localStorage', {
+      value: localStorageMock,
+      writable: true,
+    });
+
+    const onSearchMock = vi.fn(() => {
+      localStorage.setItem('rickAndMortySearchTerm', searchTerm);
+    });
+
+    render(
+      <Search
+        searchTerm={searchTerm}
+        onSearchChange={vi.fn()}
+        onSearch={onSearchMock}
+      />
+    );
+
+    const searchButton = screen.getByRole('button', { name: 'Search' });
+    searchButton.click();
+
+    expect(onSearchMock).toHaveBeenCalledTimes(1);
+    expect(localStorageMock.setItem).toHaveBeenCalledWith(
+      'rickAndMortySearchTerm',
+      searchTerm
+    );
+
+    vi.restoreAllMocks();
+  });
+
   it('displays previously saved search term from localStorage on mount', () => {
     const savedSearchTerm = 'Rick Sanchez';
     const localStorageMock = {
