@@ -46,6 +46,26 @@ describe('Search Component', () => {
     expect(searchInput).toHaveValue('');
   });
 
+  it('displays empty input when localStorage has no saved term', () => {
+    const localStorageMock = {
+      getItem: vi.fn().mockReturnValue(null),
+      setItem: vi.fn(),
+    };
+    Object.defineProperty(window, 'localStorage', {
+      value: localStorageMock,
+    });
+
+    render(<Search {...defaultProps} />);
+
+    const searchInput = screen.getByPlaceholderText(
+      'Find Rick and Morty characters'
+    );
+    expect(searchInput).toHaveValue('');
+    expect(localStorageMock.getItem).not.toHaveBeenCalled();
+
+    vi.restoreAllMocks();
+  });
+
   it('displays previously saved search term from localStorage on mount', () => {
     const savedSearchTerm = 'Rick Sanchez';
     const localStorageMock = {
