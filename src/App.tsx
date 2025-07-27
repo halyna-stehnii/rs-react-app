@@ -1,7 +1,8 @@
 import { useState, useEffect, ChangeEvent } from 'react';
-import { useSearchParams, Outlet, useNavigate } from 'react-router-dom';
+import { Outlet, useNavigate } from 'react-router-dom';
 import SearchResults from './components/SearchResults';
 import Search from './components/Search';
+import useSearchQuery from './hooks/useSearchQuery';
 import './App.css';
 import './components/CharacterDetails.css';
 
@@ -30,9 +31,16 @@ export type Person = {
 
 const AppContent = () => {
   const navigate = useNavigate();
-  const [searchParams, setSearchParams] = useSearchParams();
 
-  const [searchTerm, setSearchTerm] = useState('');
+  const {
+    searchTerm,
+    storedSearchTerm,
+    currentPage,
+    handleSearchInputChange: updateSearchTerm,
+    handleSearch: executeSearch,
+    handlePageChange: changePage,
+  } = useSearchQuery('searchTerm', '');
+
   const [searchResults, setSearchResults] = useState<SearchResult>({
     count: 0,
     next: null,
@@ -42,47 +50,22 @@ const AppContent = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [hasError, setHasError] = useState(false);
 
-  const pageParam = searchParams.get('page');
-  const [currentPage, setCurrentPage] = useState(
-    pageParam ? parseInt(pageParam, 10) : 1
-  );
-
   useEffect(() => {
-    const initialPage = pageParam ? parseInt(pageParam, 10) : 1;
-    setCurrentPage(initialPage);
-
-    const savedSearchTerm = localStorage.getItem('searchTerm');
-    if (savedSearchTerm) {
-      setSearchTerm(savedSearchTerm);
-      fetchSearchResults(savedSearchTerm, initialPage);
-    } else {
-      fetchSearchResults('', initialPage);
-    }
-  }, [pageParam]);
+    fetchSearchResults(storedSearchTerm, currentPage);
+  }, [storedSearchTerm, currentPage]);
 
   const handleSearchInputChange = (event: ChangeEvent<HTMLInputElement>) => {
-    setSearchTerm(event.target.value);
+    updateSearchTerm(event.target.value);
   };
 
   const handleSearch = () => {
-    const trimmedSearchTerm = searchTerm.trim();
-    setCurrentPage(1);
-
-    const newSearchParams = new URLSearchParams();
-    newSearchParams.set('page', '1');
-    setSearchParams(newSearchParams);
-
-    fetchSearchResults(trimmedSearchTerm, 1);
+    const result = executeSearch();
+    fetchSearchResults(result.searchTerm, result.page);
   };
 
   const handlePageChange = (page: number) => {
-    setCurrentPage(page);
-
-    const newSearchParams = new URLSearchParams(searchParams);
-    newSearchParams.set('page', page.toString());
-    setSearchParams(newSearchParams);
-
-    fetchSearchResults(searchTerm, page);
+    const result = changePage(page);
+    fetchSearchResults(result.searchTerm, result.page);
   };
 
   const handleCharacterSelect = (characterId: string) => {
@@ -111,9 +94,6 @@ const AppContent = () => {
         });
 
         setIsLoading(false);
-        if (data.results && data.results.length > 0) {
-          localStorage.setItem('searchTerm', searchTerm);
-        }
       })
       .catch((error) => {
         console.error('Error fetching search results', error);
