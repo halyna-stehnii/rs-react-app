@@ -1,4 +1,4 @@
-import { Component, ChangeEvent } from 'react';
+import { useState, useEffect, ChangeEvent } from 'react';
 import SearchResults from './components/SearchResults';
 import Search from './components/Search';
 import './App.css';
@@ -18,47 +18,41 @@ export type Person = {
   episode: string[];
 };
 
-interface State {
-  searchTerm: string;
-  searchResults: SearchResult;
-  isLoading: boolean;
-  hasError: boolean;
-}
+const App = () => {
+  const [searchTerm, setSearchTerm] = useState('');
+  const [searchResults, setSearchResults] = useState<SearchResult>({
+    count: 0,
+    next: '',
+    previous: '',
+    results: [],
+  });
+  const [isLoading, setIsLoading] = useState(false);
+  const [hasError, setHasError] = useState(false);
 
-class App extends Component<object, State> {
-  constructor(props: object) {
-    super(props);
-    this.state = {
-      searchTerm: '',
-      searchResults: { count: 0, next: '', previous: '', results: [] },
-      isLoading: false,
-      hasError: false,
-    };
-  }
-
-  componentDidMount() {
+  useEffect(() => {
     const savedSearchTerm = localStorage.getItem('searchTerm');
     if (savedSearchTerm) {
-      this.setState({ searchTerm: savedSearchTerm });
-      this.fetchSearchResults(savedSearchTerm);
+      setSearchTerm(savedSearchTerm);
+      fetchSearchResults(savedSearchTerm);
     } else {
-      this.fetchSearchResults();
+      fetchSearchResults();
     }
-  }
-  handleSearchInputChange = (event: ChangeEvent<HTMLInputElement>) => {
-    this.setState({ searchTerm: event.target.value });
+  }, []);
+
+  const handleSearchInputChange = (event: ChangeEvent<HTMLInputElement>) => {
+    setSearchTerm(event.target.value);
   };
 
-  handleSearch = () => {
-    const trimmedSearchTerm = this.state.searchTerm.trim();
-    this.fetchSearchResults(trimmedSearchTerm);
+  const handleSearch = () => {
+    const trimmedSearchTerm = searchTerm.trim();
+    fetchSearchResults(trimmedSearchTerm);
   };
 
-  fetchSearchResults(searchTerm = '') {
+  const fetchSearchResults = (searchTerm = '') => {
     const apiBaseUrl = 'https://rickandmortyapi.com/api/character';
     const searchUrl = `${apiBaseUrl}/?name=${searchTerm}`;
 
-    this.setState({ isLoading: true });
+    setIsLoading(true);
 
     fetch(searchUrl)
       .then((response) => {
@@ -68,47 +62,44 @@ class App extends Component<object, State> {
         return response.json();
       })
       .then((data) => {
-        this.setState({ searchResults: data, isLoading: false });
+        setSearchResults(data);
+        setIsLoading(false);
         if (data.results && data.results.length > 0) {
           localStorage.setItem('searchTerm', searchTerm);
         }
       })
       .catch((error) => {
         console.error('Error fetching search results', error);
-        this.setState({
-          searchResults: { count: 0, next: '', previous: '', results: [] },
-          isLoading: false,
-        });
+        setSearchResults({ count: 0, next: '', previous: '', results: [] });
+        setIsLoading(false);
       });
+  };
+
+  if (hasError) {
+    throw new Error('Test error!');
   }
 
-  render() {
-    if (this.state.hasError) {
-      throw new Error('Test error!');
-    }
-
-    return (
-      <div className="App">
-        <Search
-          searchTerm={this.state.searchTerm}
-          onSearchChange={this.handleSearchInputChange}
-          onSearch={this.handleSearch}
-        />
-        {this.state.isLoading ? (
-          <div className="loader"></div>
-        ) : (
-          <SearchResults searchResults={this.state.searchResults} />
-        )}
-        <button
-          onClick={() => {
-            this.setState({ hasError: true });
-          }}
-        >
-          Throw Error
-        </button>
-      </div>
-    );
-  }
-}
+  return (
+    <div className="App">
+      <Search
+        searchTerm={searchTerm}
+        onSearchChange={handleSearchInputChange}
+        onSearch={handleSearch}
+      />
+      {isLoading ? (
+        <div className="loader"></div>
+      ) : (
+        <SearchResults searchResults={searchResults} />
+      )}
+      <button
+        onClick={() => {
+          setHasError(true);
+        }}
+      >
+        Throw Error
+      </button>
+    </div>
+  );
+};
 
 export default App;
