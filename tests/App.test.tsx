@@ -76,6 +76,24 @@ describe('App Component', () => {
     expect(await screen.findByText(/rick sanchez/i)).toBeInTheDocument();
   });
 
+  it('should show loader when fetching data', () => {
+    global.fetch = vi.fn().mockImplementation(
+      () =>
+        new Promise((resolve) => {
+          setTimeout(() => {
+            resolve({
+              json: () => Promise.resolve(mockFetchResponse),
+            });
+          }, 100);
+        })
+    );
+
+    render(<App />);
+
+    const loader = screen.getByText('', { selector: 'div.loader' });
+    expect(loader).toBeInTheDocument();
+  });
+
   it('should display loading indicator during API calls and hide it after completion', async () => {
     let resolveFunction: (value: unknown) => void = () => {};
     const delayedPromise = new Promise<unknown>((resolve) => {
