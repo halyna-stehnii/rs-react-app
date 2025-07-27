@@ -52,7 +52,7 @@ describe('App Component', () => {
     await waitFor(() => {
       expect(global.fetch).toHaveBeenCalledTimes(1);
       expect(global.fetch).toHaveBeenCalledWith(
-        'https://rickandmortyapi.com/api/character/?name='
+        'https://rickandmortyapi.com/api/character/?name=&page=1'
       );
     });
 
@@ -69,7 +69,7 @@ describe('App Component', () => {
     await waitFor(() => {
       expect(global.fetch).toHaveBeenCalledTimes(1);
       expect(global.fetch).toHaveBeenCalledWith(
-        `https://rickandmortyapi.com/api/character/?name=${savedSearchTerm}`
+        `https://rickandmortyapi.com/api/character/?name=${savedSearchTerm}&page=1`
       );
     });
 
@@ -206,7 +206,7 @@ describe('App Component', () => {
     await waitFor(() => {
       expect(global.fetch).toHaveBeenCalledTimes(1);
       expect(global.fetch).toHaveBeenCalledWith(
-        'https://rickandmortyapi.com/api/character/?name='
+        'https://rickandmortyapi.com/api/character/?name=&page=1'
       );
     });
 
