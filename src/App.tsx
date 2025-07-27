@@ -5,9 +5,16 @@ import './App.css';
 
 export type SearchResult = {
   count: number;
-  next: string;
-  previous: string;
+  next: string | null;
+  previous: string | null;
   results: Person[];
+  pages?: number;
+  info?: {
+    count: number;
+    pages: number;
+    next: string | null;
+    prev: string | null;
+  };
 };
 
 export type Person = {
@@ -22,21 +29,40 @@ const App = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [searchResults, setSearchResults] = useState<SearchResult>({
     count: 0,
-    next: '',
-    previous: '',
+    next: null,
+    previous: null,
     results: [],
   });
   const [isLoading, setIsLoading] = useState(false);
   const [hasError, setHasError] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+
+  const getPageFromUrl = () => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const pageParam = urlParams.get('page');
+    return pageParam ? parseInt(pageParam, 10) : 1;
+  };
 
   useEffect(() => {
+    const initialPage = getPageFromUrl();
+    setCurrentPage(initialPage);
+
     const savedSearchTerm = localStorage.getItem('searchTerm');
     if (savedSearchTerm) {
       setSearchTerm(savedSearchTerm);
-      fetchSearchResults(savedSearchTerm);
+      fetchSearchResults(savedSearchTerm, initialPage);
     } else {
-      fetchSearchResults();
+      fetchSearchResults('', initialPage);
     }
+
+    const handlePopState = () => {
+      const newPage = getPageFromUrl();
+      setCurrentPage(newPage);
+      fetchSearchResults(searchTerm, newPage);
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
   }, []);
 
   const handleSearchInputChange = (event: ChangeEvent<HTMLInputElement>) => {
@@ -45,12 +71,26 @@ const App = () => {
 
   const handleSearch = () => {
     const trimmedSearchTerm = searchTerm.trim();
-    fetchSearchResults(trimmedSearchTerm);
+    setCurrentPage(1);
+    updateUrlWithPage(1);
+    fetchSearchResults(trimmedSearchTerm, 1);
   };
 
-  const fetchSearchResults = (searchTerm = '') => {
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+    updateUrlWithPage(page);
+    fetchSearchResults(searchTerm, page);
+  };
+
+  const updateUrlWithPage = (page: number) => {
+    const url = new URL(window.location.href);
+    url.searchParams.set('page', page.toString());
+    window.history.pushState({}, '', url);
+  };
+
+  const fetchSearchResults = (searchTerm = '', page = 1) => {
     const apiBaseUrl = 'https://rickandmortyapi.com/api/character';
-    const searchUrl = `${apiBaseUrl}/?name=${searchTerm}`;
+    const searchUrl = `${apiBaseUrl}/?name=${searchTerm}&page=${page}`;
 
     setIsLoading(true);
 
@@ -62,7 +102,13 @@ const App = () => {
         return response.json();
       })
       .then((data) => {
-        setSearchResults(data);
+        const totalPages = Math.ceil(data.info?.count / 20) || 1;
+
+        setSearchResults({
+          ...data,
+          pages: totalPages,
+        });
+
         setIsLoading(false);
         if (data.results && data.results.length > 0) {
           localStorage.setItem('searchTerm', searchTerm);
@@ -70,7 +116,7 @@ const App = () => {
       })
       .catch((error) => {
         console.error('Error fetching search results', error);
-        setSearchResults({ count: 0, next: '', previous: '', results: [] });
+        setSearchResults({ count: 0, next: null, previous: null, results: [] });
         setIsLoading(false);
       });
   };
@@ -89,7 +135,11 @@ const App = () => {
       {isLoading ? (
         <div className="loader"></div>
       ) : (
-        <SearchResults searchResults={searchResults} />
+        <SearchResults
+          searchResults={searchResults}
+          currentPage={currentPage}
+          onPageChange={handlePageChange}
+        />
       )}
       <button
         onClick={() => {
