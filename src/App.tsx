@@ -1,7 +1,9 @@
 import { useState, useEffect, ChangeEvent } from 'react';
+import { useSearchParams, Outlet, useNavigate } from 'react-router-dom';
 import SearchResults from './components/SearchResults';
 import Search from './components/Search';
 import './App.css';
+import './components/CharacterDetails.css';
 
 export type SearchResult = {
   count: number;
@@ -18,6 +20,7 @@ export type SearchResult = {
 };
 
 export type Person = {
+  id?: number;
   name: string;
   status: string;
   species: string;
@@ -25,7 +28,10 @@ export type Person = {
   episode: string[];
 };
 
-const App = () => {
+const AppContent = () => {
+  const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
+
   const [searchTerm, setSearchTerm] = useState('');
   const [searchResults, setSearchResults] = useState<SearchResult>({
     count: 0,
@@ -35,16 +41,14 @@ const App = () => {
   });
   const [isLoading, setIsLoading] = useState(false);
   const [hasError, setHasError] = useState(false);
-  const [currentPage, setCurrentPage] = useState(1);
 
-  const getPageFromUrl = () => {
-    const urlParams = new URLSearchParams(window.location.search);
-    const pageParam = urlParams.get('page');
-    return pageParam ? parseInt(pageParam, 10) : 1;
-  };
+  const pageParam = searchParams.get('page');
+  const [currentPage, setCurrentPage] = useState(
+    pageParam ? parseInt(pageParam, 10) : 1
+  );
 
   useEffect(() => {
-    const initialPage = getPageFromUrl();
+    const initialPage = pageParam ? parseInt(pageParam, 10) : 1;
     setCurrentPage(initialPage);
 
     const savedSearchTerm = localStorage.getItem('searchTerm');
@@ -54,16 +58,7 @@ const App = () => {
     } else {
       fetchSearchResults('', initialPage);
     }
-
-    const handlePopState = () => {
-      const newPage = getPageFromUrl();
-      setCurrentPage(newPage);
-      fetchSearchResults(searchTerm, newPage);
-    };
-
-    window.addEventListener('popstate', handlePopState);
-    return () => window.removeEventListener('popstate', handlePopState);
-  }, []);
+  }, [pageParam]);
 
   const handleSearchInputChange = (event: ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(event.target.value);
@@ -72,20 +67,26 @@ const App = () => {
   const handleSearch = () => {
     const trimmedSearchTerm = searchTerm.trim();
     setCurrentPage(1);
-    updateUrlWithPage(1);
+
+    const newSearchParams = new URLSearchParams();
+    newSearchParams.set('page', '1');
+    setSearchParams(newSearchParams);
+
     fetchSearchResults(trimmedSearchTerm, 1);
   };
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
-    updateUrlWithPage(page);
+
+    const newSearchParams = new URLSearchParams(searchParams);
+    newSearchParams.set('page', page.toString());
+    setSearchParams(newSearchParams);
+
     fetchSearchResults(searchTerm, page);
   };
 
-  const updateUrlWithPage = (page: number) => {
-    const url = new URL(window.location.href);
-    url.searchParams.set('page', page.toString());
-    window.history.pushState({}, '', url);
+  const handleCharacterSelect = (characterId: string) => {
+    navigate(`/character/${characterId}?page=${currentPage}`);
   };
 
   const fetchSearchResults = (searchTerm = '', page = 1) => {
@@ -126,21 +127,29 @@ const App = () => {
   }
 
   return (
-    <div className="App">
+    <div className="app-container">
       <Search
         searchTerm={searchTerm}
         onSearchChange={handleSearchInputChange}
         onSearch={handleSearch}
       />
-      {isLoading ? (
-        <div className="loader"></div>
-      ) : (
-        <SearchResults
-          searchResults={searchResults}
-          currentPage={currentPage}
-          onPageChange={handlePageChange}
-        />
-      )}
+
+      <div className="main-content">
+        <div className="search-results-container">
+          {isLoading ? (
+            <div className="loader"></div>
+          ) : (
+            <SearchResults
+              searchResults={searchResults}
+              currentPage={currentPage}
+              onPageChange={handlePageChange}
+              onSelectCharacter={handleCharacterSelect}
+            />
+          )}
+        </div>
+        <Outlet />
+      </div>
+
       <button
         onClick={() => {
           setHasError(true);
@@ -150,6 +159,10 @@ const App = () => {
       </button>
     </div>
   );
+};
+
+const App = () => {
+  return <AppContent />;
 };
 
 export default App;
