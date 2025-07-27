@@ -177,4 +177,50 @@ describe('App Component', () => {
     expect(await screen.findByText(/summer smith/i)).toBeInTheDocument();
     expect(screen.queryByText(/rick sanchez/i)).not.toBeInTheDocument();
   });
+
+  it('should successfully fetch and display data with all expected properties', async () => {
+    const detailedMockResponse = {
+      count: 1,
+      next: null,
+      previous: null,
+      results: [
+        {
+          name: 'Beth Smith',
+          status: 'Alive',
+          species: 'Human',
+          image: 'beth.jpg',
+          episode: ['episode1', 'episode2', 'episode3'],
+        },
+      ],
+    };
+
+    global.fetch = vi.fn().mockImplementation(() =>
+      Promise.resolve({
+        ok: true,
+        json: () => Promise.resolve(detailedMockResponse),
+      })
+    );
+
+    render(<App />);
+
+    await waitFor(() => {
+      expect(global.fetch).toHaveBeenCalledTimes(1);
+      expect(global.fetch).toHaveBeenCalledWith(
+        'https://rickandmortyapi.com/api/character/?name='
+      );
+    });
+
+    expect(await screen.findByText(/Name: Beth Smith/i)).toBeInTheDocument();
+    expect(await screen.findByText(/Status: Alive/i)).toBeInTheDocument();
+    expect(await screen.findByText(/Species: Human/i)).toBeInTheDocument();
+
+    const characterImage = screen.getByAltText('Beth Smith');
+    expect(characterImage).toBeInTheDocument();
+    expect(characterImage).toHaveAttribute('src', 'beth.jpg');
+
+    expect(global.fetch).toHaveBeenCalledTimes(1);
+    expect(document.getElementsByClassName('loader').length).toBe(0);
+
+    expect(localStorage.getItem('searchTerm')).toBe('');
+  });
 });
