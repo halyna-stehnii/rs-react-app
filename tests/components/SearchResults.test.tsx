@@ -1,4 +1,5 @@
-import { render, screen } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
+import { vi } from 'vitest';
 import SearchResults from '../../src/components/SearchResults';
 
 describe('SearchResults Component', () => {
@@ -9,6 +10,9 @@ describe('SearchResults Component', () => {
       previous: '',
       results: [],
     },
+    currentPage: 1,
+    onPageChange: vi.fn(),
+    onSelectCharacter: vi.fn(),
   };
 
   it('displays a message when there are no results', () => {
@@ -44,6 +48,9 @@ describe('SearchResults Component', () => {
           previous: '',
           results: results,
         }}
+        currentPage={1}
+        onPageChange={vi.fn()}
+        onSelectCharacter={vi.fn()}
       />
     );
     const resultItems = screen.getAllByRole('listitem');
@@ -68,6 +75,9 @@ describe('SearchResults Component', () => {
           previous: '',
           results: [testCharacter],
         }}
+        currentPage={1}
+        onPageChange={vi.fn()}
+        onSelectCharacter={vi.fn()}
       />
     );
 
@@ -118,15 +128,53 @@ describe('SearchResults Component', () => {
           previous: '',
           results: [characterWithEmptyProps],
         }}
+        currentPage={1}
+        onPageChange={vi.fn()}
+        onSelectCharacter={vi.fn()}
       />
     );
 
     const characterImage = screen.getByRole('img');
     expect(characterImage).toBeInTheDocument();
-    expect(characterImage).toHaveAttribute('src', 'no-image.png');
+    expect(characterImage).toHaveAttribute('src', 'no-img.png');
 
     expect(screen.getByText('Name: No data')).toBeInTheDocument();
     expect(screen.getByText('Status: No data')).toBeInTheDocument();
     expect(screen.getByText('Species: No data')).toBeInTheDocument();
+  });
+
+  it('calls onSelectCharacter when a character is clicked', () => {
+    const mockSelectCharacter = vi.fn();
+    const testCharacter = {
+      id: 1,
+      name: 'Rick Sanchez',
+      status: 'Alive',
+      species: 'Human',
+      image: 'https://rickandmortyapi.com/api/character/avatar/1.jpeg',
+      episode: [],
+    };
+
+    render(
+      <SearchResults
+        searchResults={{
+          count: 1,
+          next: '',
+          previous: '',
+          results: [testCharacter],
+        }}
+        currentPage={1}
+        onPageChange={vi.fn()}
+        onSelectCharacter={mockSelectCharacter}
+      />
+    );
+
+    const characterContainer = screen
+      .getByAltText(testCharacter.name)
+      .closest('.character-container');
+
+    if (characterContainer) {
+      fireEvent.click(characterContainer);
+      expect(mockSelectCharacter).toHaveBeenCalledWith('1');
+    }
   });
 });
