@@ -99,4 +99,34 @@ describe('SearchResults Component', () => {
       .closest('.character-info');
     expect(infoContainer).toHaveClass('character-info');
   });
+
+  it('handles empty character properties gracefully', () => {
+    const characterWithEmptyProps = {
+      id: 3,
+      name: '',
+      status: '',
+      species: '',
+      image: '',
+      episode: [],
+    };
+
+    render(
+      <SearchResults
+        searchResults={{
+          count: 1,
+          next: '',
+          previous: '',
+          results: [characterWithEmptyProps],
+        }}
+      />
+    );
+
+    const characterImage = screen.getByRole('img');
+    expect(characterImage).toBeInTheDocument();
+    expect(characterImage).toHaveAttribute('src', 'no-image.png');
+
+    expect(screen.getByText('Name: No data')).toBeInTheDocument();
+    expect(screen.getByText('Status: No data')).toBeInTheDocument();
+    expect(screen.getByText('Species: No data')).toBeInTheDocument();
+  });
 });
