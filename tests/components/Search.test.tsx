@@ -202,4 +202,42 @@ describe('Search Component', () => {
 
     expect(onSearchChangeMock).toHaveBeenCalled();
   });
+
+  it('trims whitespace from search term before saving to localStorage', () => {
+    const untrimmedSearchTerm = '  Beth Smith  ';
+    const trimmedSearchTerm = 'Beth Smith';
+
+    const localStorageMock = {
+      getItem: vi.fn(),
+      setItem: vi.fn(),
+    };
+
+    Object.defineProperty(window, 'localStorage', {
+      value: localStorageMock,
+      writable: true,
+    });
+
+    const onSearchMock = vi.fn(() => {
+      localStorage.setItem('savedSearchTerm', untrimmedSearchTerm.trim());
+    });
+
+    render(
+      <Search
+        searchTerm={untrimmedSearchTerm}
+        onSearchChange={vi.fn()}
+        onSearch={onSearchMock}
+      />
+    );
+
+    const searchButton = screen.getByRole('button', { name: 'Search' });
+    searchButton.click();
+
+    expect(onSearchMock).toHaveBeenCalledTimes(1);
+    expect(localStorageMock.setItem).toHaveBeenCalledWith(
+      'savedSearchTerm',
+      trimmedSearchTerm
+    );
+
+    vi.restoreAllMocks();
+  });
 });
