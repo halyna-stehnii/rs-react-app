@@ -19,12 +19,15 @@ class SearchResults extends React.Component<SearchResultsProps> {
               <li key={index}>
                 <div className="character-container">
                   <div className="character-image">
-                    <img src={result.image} alt={result.name} />
+                    <img
+                      src={result.image || 'no-image.png'}
+                      alt={result.name || 'No data'}
+                    />
                   </div>
                   <div className="character-info">
-                    <div>Name: {result.name}</div>
-                    <div>Status: {result.status}</div>
-                    <div>Species: {result.species}</div>
+                    <div>Name: {result.name || 'No data'}</div>
+                    <div>Status: {result.status || 'No data'}</div>
+                    <div>Species: {result.species || 'No data'}</div>
                   </div>
                 </div>
               </li>
