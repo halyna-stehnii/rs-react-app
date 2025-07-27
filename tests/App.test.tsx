@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import App from '../src/App';
 
@@ -74,5 +74,89 @@ describe('App Component', () => {
     });
 
     expect(await screen.findByText(/rick sanchez/i)).toBeInTheDocument();
+  });
+
+  it('should display loading indicator during API calls and hide it after completion', async () => {
+    let resolveFunction: (value: unknown) => void = () => {};
+    const delayedPromise = new Promise<unknown>((resolve) => {
+      resolveFunction = resolve;
+    });
+
+    global.fetch = vi.fn().mockImplementation(() =>
+      Promise.resolve({
+        ok: true,
+        json: () => delayedPromise,
+      })
+    );
+
+    render(<App />);
+
+    const loaderElements = document.getElementsByClassName('loader');
+    expect(loaderElements.length).toBeGreaterThan(0);
+
+    resolveFunction(mockFetchResponse);
+
+    await waitFor(() => {
+      const loaderElements = document.getElementsByClassName('loader');
+      expect(loaderElements.length).toBe(0);
+    });
+
+    expect(await screen.findByText(/rick sanchez/i)).toBeInTheDocument();
+  });
+
+  it('should handle search button clicks with proper loading states', async () => {
+    render(<App />);
+
+    await waitFor(() => {
+      const loaderElements = document.getElementsByClassName('loader');
+      expect(loaderElements.length).toBe(0);
+    });
+
+    const searchInput = screen.getByPlaceholderText(
+      'Find Rick and Morty characters'
+    );
+    const searchButton = screen.getByRole('button', { name: /search/i });
+
+    fireEvent.change(searchInput, { target: { value: 'Summer' } });
+
+    const summerResponse = {
+      ...mockFetchResponse,
+      results: [
+        {
+          name: 'Summer Smith',
+          status: 'Alive',
+          species: 'Human',
+          image: 'summer.jpg',
+          episode: ['episode1', 'episode2'],
+        },
+      ],
+    };
+
+    let resolveFunction: (value: unknown) => void = () => {};
+    const delayedPromise = new Promise<unknown>((resolve) => {
+      resolveFunction = resolve;
+    });
+
+    global.fetch = vi.fn().mockImplementation(() =>
+      Promise.resolve({
+        ok: true,
+        json: () => delayedPromise,
+      })
+    );
+
+    fireEvent.click(searchButton);
+
+    const loaderElements = document.getElementsByClassName('loader');
+    expect(loaderElements.length).toBeGreaterThan(0);
+
+    resolveFunction(summerResponse);
+
+    await waitFor(() => {
+      const loaderElements = document.getElementsByClassName('loader');
+      expect(loaderElements.length).toBe(0);
+    });
+
+    expect(await screen.findByText(/summer smith/i)).toBeInTheDocument();
+    expect(screen.queryByText(/rick sanchez/i)).not.toBeInTheDocument();
   });
 });
