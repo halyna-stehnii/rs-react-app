@@ -3,6 +3,15 @@ import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import App from '../src/App';
 
+vi.mock('react-router-dom', () => ({
+  BrowserRouter: ({ children }: { children: React.ReactNode }) => (
+    <div>{children}</div>
+  ),
+  useSearchParams: () => [new URLSearchParams(), vi.fn()],
+  useNavigate: () => vi.fn(),
+  Outlet: () => <div data-testid="outlet"></div>,
+}));
+
 declare const global: {
   fetch: (input: RequestInfo | URL, init?: RequestInit) => Promise<Response>;
 };
@@ -62,7 +71,7 @@ describe('App Component', () => {
 
   it('should load saved search term from localStorage and make API call with it', async () => {
     const savedSearchTerm = 'Rick';
-    localStorage.setItem('searchTerm', savedSearchTerm);
+    localStorage.setItem('searchTerm', JSON.stringify(savedSearchTerm));
 
     render(<App />);
 
@@ -193,6 +202,8 @@ describe('App Component', () => {
         },
       ],
     };
+
+    localStorage.setItem('searchTerm', '');
 
     global.fetch = vi.fn().mockImplementation(() =>
       Promise.resolve({
