@@ -1,0 +1,57 @@
+.selected-items-flyout {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  background-color: #2b2d42;
+  color: white;
+  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.2);
+  transition: transform 0.3s ease-in-out;
+  z-index: 1000;
+}
+
+.flyout-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 20px;
+  max-width: 1280px;
+  margin: 0 auto;
+}
+
+.flyout-message {
+  font-size: 18px;
+  font-weight: 500;
+}
+
+.flyout-buttons {
+  display: flex;
+  gap: 10px;
+}
+
+.flyout-button {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background-color 0.2s;
+}
+
+.unselect-button {
+  background-color: #8d99ae;
+  color: #2b2d42;
+}
+
+.unselect-button:hover {
+  background-color: #edf2f4;
+}
+
+.download-button {
+  background-color: #0075fb;
+  color: #edf2f4;
+}
+
+.download-button:hover {
+  background-color: #0056b3;
+}
