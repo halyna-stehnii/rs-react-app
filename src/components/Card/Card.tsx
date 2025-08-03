@@ -1,4 +1,4 @@
-import { Person } from '../../App';
+import { Person } from '../../model/types';
 
 interface CardProps {
   character: Person;

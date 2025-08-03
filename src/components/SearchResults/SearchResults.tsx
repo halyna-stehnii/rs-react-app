@@ -1,4 +1,4 @@
-import { SearchResult, Person } from '../../App';
+import { SearchResult, Person } from '../../model/types';
 import Pagination from '../Pagination/Pagination';
 import Card from '../Card/Card';
 import './SearchResults.css';

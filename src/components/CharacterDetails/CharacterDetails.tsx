@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
-import { Person } from '../../App';
+import { Person } from '../../model/types';
 
 const CharacterDetails = () => {
   const [character, setCharacter] = useState<Person | null>(null);

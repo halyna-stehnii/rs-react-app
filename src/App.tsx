@@ -3,31 +3,9 @@ import { Outlet, useNavigate } from 'react-router-dom';
 import SearchResults from './components/SearchResults/SearchResults';
 import Search from './components/Search/Search';
 import useSearchQuery from './hooks/useSearchQuery';
+import { SearchResult } from './model/types';
 import './App.css';
 import './components/CharacterDetails/CharacterDetails.css';
-
-export type SearchResult = {
-  count: number;
-  next: string | null;
-  previous: string | null;
-  results: Person[];
-  pages?: number;
-  info?: {
-    count: number;
-    pages: number;
-    next: string | null;
-    prev: string | null;
-  };
-};
-
-export type Person = {
-  id?: number;
-  name: string;
-  status: string;
-  species: string;
-  image: string;
-  episode: string[];
-};
 
 const AppContent = () => {
   const navigate = useNavigate();
