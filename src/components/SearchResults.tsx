@@ -1,5 +1,6 @@
 import { SearchResult, Person } from '../App';
 import Pagination from './Pagination';
+import Card from './Card';
 import './SearchResults.css';
 
 interface SearchResultsProps {
@@ -33,22 +34,7 @@ const SearchResults = ({
           <ul className="search-results">
             {searchResults.results.map((result, index) => (
               <li key={index}>
-                <div
-                  className="character-container character-item"
-                  onClick={() => handleCharacterClick(result)}
-                >
-                  <div className="character-image">
-                    <img
-                      src={result.image || 'no-img.png'}
-                      alt={result.name || 'No data'}
-                    />
-                  </div>
-                  <div className="character-info">
-                    <div>Name: {result.name || 'No data'}</div>
-                    <div>Status: {result.status || 'No data'}</div>
-                    <div>Species: {result.species || 'No data'}</div>
-                  </div>
-                </div>
+                <Card character={result} onClick={handleCharacterClick} />
               </li>
             ))}
           </ul>
