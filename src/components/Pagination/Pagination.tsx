@@ -1,5 +1,5 @@
 import React from 'react';
-import './SearchResults.css';
+import '../SearchResults/SearchResults.css';
 
 interface PaginationProps {
   currentPage: number;

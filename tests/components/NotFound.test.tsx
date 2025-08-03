@@ -3,7 +3,7 @@ import { render, screen } from '@testing-library/react';
 import React from 'react';
 import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom';
-import NotFound from '../../src/components/NotFound';
+import NotFound from '../../src/pages/NotFound/NotFound';
 
 const mockNavigate = vi.fn();
 

@@ -1,7 +1,7 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 import { vi } from 'vitest';
 import React from 'react';
-import Pagination from '../../src/components/Pagination';
+import Pagination from '../../src/components/Pagination/Pagination';
 
 describe('Pagination Component', () => {
   const defaultProps = {

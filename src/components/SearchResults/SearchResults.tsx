@@ -1,6 +1,6 @@
-import { SearchResult, Person } from '../App';
-import Pagination from './Pagination';
-import Card from './Card';
+import { SearchResult, Person } from '../../App';
+import Pagination from '../Pagination/Pagination';
+import Card from '../Card/Card';
 import './SearchResults.css';
 
 interface SearchResultsProps {

@@ -1,4 +1,4 @@
-import { Person } from '../App';
+import { Person } from '../../App';
 
 interface CardProps {
   character: Person;

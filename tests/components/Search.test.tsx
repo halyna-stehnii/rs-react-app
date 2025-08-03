@@ -1,6 +1,6 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 import { vi } from 'vitest';
-import Search from '../../src/components/Search';
+import Search from '../../src/components/Search/Search';
 
 describe('Search Component', () => {
   const defaultProps = {

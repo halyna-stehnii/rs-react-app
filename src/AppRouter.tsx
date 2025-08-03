@@ -1,8 +1,8 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import App from './App';
-import CharacterDetails from './components/CharacterDetails';
-import NotFound from './components/NotFound';
-import ErrorBoundary from './components/ErrorBoundary';
+import CharacterDetails from './components/CharacterDetails/CharacterDetails';
+import NotFound from './pages/NotFound/NotFound';
+import ErrorBoundary from './components/ErrorBoundary/ErrorBoundary';
 
 const AppRouter = () => {
   return (

@@ -1,10 +1,10 @@
 import { useState, useEffect, ChangeEvent } from 'react';
 import { Outlet, useNavigate } from 'react-router-dom';
-import SearchResults from './components/SearchResults';
-import Search from './components/Search';
+import SearchResults from './components/SearchResults/SearchResults';
+import Search from './components/Search/Search';
 import useSearchQuery from './hooks/useSearchQuery';
 import './App.css';
-import './components/CharacterDetails.css';
+import './components/CharacterDetails/CharacterDetails.css';
 
 export type SearchResult = {
   count: number;
