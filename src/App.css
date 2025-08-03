@@ -6,6 +6,23 @@
   color: #2b2d42;
 }
 
+.character-container {
+  position: relative;
+}
+
+.checkbox-container {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 10;
+}
+
+.checkbox-container input[type="checkbox"] {
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+}
+
 .search-input {
   width: 300px;
   padding: 10px;
