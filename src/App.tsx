@@ -2,6 +2,7 @@ import { useState, useEffect, ChangeEvent } from 'react';
 import { Outlet, useNavigate } from 'react-router-dom';
 import SearchResults from './components/SearchResults/SearchResults';
 import Search from './components/Search/Search';
+import SelectedItemsFlyout from './components/SelectedItemsFlyout/SelectedItemsFlyout';
 import useSearchQuery from './hooks/useSearchQuery';
 import { SearchResult } from './model/types';
 import './App.css';
@@ -115,6 +116,7 @@ const AppContent = () => {
       >
         Throw Error
       </button>
+      <SelectedItemsFlyout />
     </div>
   );
 };
