@@ -1,6 +1,7 @@
-import { render, screen, fireEvent } from '@testing-library/react';
+import { screen, fireEvent } from '@testing-library/react';
 import { vi } from 'vitest';
 import SearchResults from '../../src/components/SearchResults/SearchResults';
+import { renderWithRedux } from '../utils/test-utils';
 
 describe('SearchResults Component', () => {
   const defaultProps = {
@@ -15,8 +16,16 @@ describe('SearchResults Component', () => {
     onSelectCharacter: vi.fn(),
   };
 
+  const initialReduxState = {
+    characters: {
+      selectedCharacters: {},
+    },
+  };
+
   it('displays a message when there are no results', () => {
-    render(<SearchResults {...defaultProps} />);
+    renderWithRedux(<SearchResults {...defaultProps} />, {
+      preloadedState: initialReduxState,
+    });
     const noResultsMessage = screen.getByText(/no results/i);
     expect(noResultsMessage).toBeInTheDocument();
   });
@@ -40,7 +49,7 @@ describe('SearchResults Component', () => {
         episode: [],
       },
     ];
-    render(
+    renderWithRedux(
       <SearchResults
         searchResults={{
           count: results.length,
@@ -51,7 +60,8 @@ describe('SearchResults Component', () => {
         currentPage={1}
         onPageChange={vi.fn()}
         onSelectCharacter={vi.fn()}
-      />
+      />,
+      { preloadedState: initialReduxState }
     );
     const resultItems = screen.getAllByRole('listitem');
     expect(resultItems).toHaveLength(results.length);
@@ -67,7 +77,7 @@ describe('SearchResults Component', () => {
       episode: [],
     };
 
-    render(
+    renderWithRedux(
       <SearchResults
         searchResults={{
           count: 1,
@@ -78,7 +88,8 @@ describe('SearchResults Component', () => {
         currentPage={1}
         onPageChange={vi.fn()}
         onSelectCharacter={vi.fn()}
-      />
+      />,
+      { preloadedState: initialReduxState }
     );
 
     const characterImage = screen.getByAltText(testCharacter.name);
@@ -120,7 +131,7 @@ describe('SearchResults Component', () => {
       episode: [],
     };
 
-    render(
+    renderWithRedux(
       <SearchResults
         searchResults={{
           count: 1,
@@ -131,7 +142,8 @@ describe('SearchResults Component', () => {
         currentPage={1}
         onPageChange={vi.fn()}
         onSelectCharacter={vi.fn()}
-      />
+      />,
+      { preloadedState: initialReduxState }
     );
 
     const characterImage = screen.getByRole('img');
@@ -154,7 +166,7 @@ describe('SearchResults Component', () => {
       episode: [],
     };
 
-    render(
+    renderWithRedux(
       <SearchResults
         searchResults={{
           count: 1,
@@ -165,7 +177,8 @@ describe('SearchResults Component', () => {
         currentPage={1}
         onPageChange={vi.fn()}
         onSelectCharacter={mockSelectCharacter}
-      />
+      />,
+      { preloadedState: initialReduxState }
     );
 
     const characterContainer = screen
