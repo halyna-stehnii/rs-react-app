@@ -1,13 +1,11 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, waitFor } from '@testing-library/react';
+import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom';
 import CharacterDetails from '../../src/components/CharacterDetails/CharacterDetails';
 import React from 'react';
-
-declare const global: {
-  fetch: (input: RequestInfo | URL, init?: RequestInit) => Promise<Response>;
-};
+import { renderWithRedux } from '../utils/test-utils';
+import { useGetCharacterByIdQuery } from '../../src/services/rickAndMortyApi';
 
 const mockNavigate = vi.fn();
 const mockUseParams = vi.fn().mockReturnValue({ characterId: '1' });
@@ -19,7 +17,7 @@ vi.mock('react-router-dom', () => ({
   useSearchParams: () => [mockSearchParams, vi.fn()],
 }));
 
-describe('CharacterDetails Component', () => {
+vi.mock('../../src/services/rickAndMortyApi', () => {
   const mockCharacterData = {
     id: 1,
     name: 'Rick Sanchez',
@@ -29,64 +27,74 @@ describe('CharacterDetails Component', () => {
     episode: ['episode1', 'episode2', 'episode3'],
   };
 
+  return {
+    rickAndMortyApi: {
+      endpoints: {},
+      reducerPath: 'rickAndMortyApi',
+      reducer: () => ({}),
+      middleware: () => () => {},
+    },
+    useGetCharacterByIdQuery: vi.fn().mockReturnValue({
+      data: mockCharacterData,
+      isLoading: false,
+      error: null,
+      refetch: vi.fn(),
+      isFetching: false,
+    }),
+  };
+});
+
+describe('CharacterDetails Component', () => {
   beforeEach(() => {
-    global.fetch = vi.fn().mockImplementation(() =>
-      Promise.resolve({
-        ok: true,
-        json: () => Promise.resolve(mockCharacterData),
-      })
-    );
+    vi.clearAllMocks();
   });
 
-  it('shows loading state initially', () => {
-    render(<CharacterDetails />);
-    expect(
-      screen.getByText(/loading/i) || screen.getByTestId('loader')
-    ).toBeInTheDocument();
-  });
+  it('displays character details', () => {
+    renderWithRedux(<CharacterDetails />);
 
-  it('displays character details after loading', async () => {
-    render(<CharacterDetails />);
-
-    await waitFor(() => {
-      expect(screen.queryByText(/loading/i)).not.toBeInTheDocument();
-    });
-
-    expect(screen.getByText(mockCharacterData.name)).toBeInTheDocument();
+    // Check character details are displayed
+    expect(screen.getByText('Rick Sanchez')).toBeInTheDocument();
     expect(screen.getByText('Status:')).toBeInTheDocument();
-    expect(screen.getByText(mockCharacterData.status)).toBeInTheDocument();
+    expect(screen.getByText('Alive')).toBeInTheDocument();
     expect(screen.getByText('Species:')).toBeInTheDocument();
-    expect(screen.getByText(mockCharacterData.species)).toBeInTheDocument();
+    expect(screen.getByText('Human')).toBeInTheDocument();
 
     const image = screen.getByRole('img');
-    expect(image).toHaveAttribute('src', mockCharacterData.image);
-    expect(image).toHaveAttribute('alt', mockCharacterData.name);
+    expect(image).toHaveAttribute(
+      'src',
+      'https://rickandmortyapi.com/api/character/avatar/1.jpeg'
+    );
+    expect(image).toHaveAttribute('alt', 'Rick Sanchez');
   });
 
-  it('handles API errors gracefully', async () => {
-    global.fetch = vi.fn().mockImplementation(() =>
-      Promise.resolve({
-        ok: false,
-        status: 404,
-        json: () => Promise.reject(new Error('Not found')),
-      })
-    );
-
-    render(<CharacterDetails />);
-
-    await waitFor(() => {
-      expect(screen.queryByText(/loading/i)).not.toBeInTheDocument();
+  it('shows loading state when data is loading', () => {
+    vi.mocked(useGetCharacterByIdQuery).mockReturnValueOnce({
+      data: undefined,
+      isLoading: true,
+      error: null,
+      refetch: vi.fn(),
+      isFetching: false,
     });
 
-    expect(screen.getByText(/character not found/i)).toBeInTheDocument();
+    renderWithRedux(<CharacterDetails />);
+    expect(screen.getByText(/loading character details/i)).toBeInTheDocument();
+  });
+
+  it('handles API errors gracefully', () => {
+    vi.mocked(useGetCharacterByIdQuery).mockReturnValueOnce({
+      data: undefined,
+      isLoading: false,
+      error: new Error('API Error'),
+      refetch: vi.fn(),
+      isFetching: false,
+    });
+
+    renderWithRedux(<CharacterDetails />);
+    expect(screen.getByText(/error loading character/i)).toBeInTheDocument();
   });
 
   it('has a working close button', async () => {
-    render(<CharacterDetails />);
-
-    await waitFor(() => {
-      expect(screen.queryByText(/loading/i)).not.toBeInTheDocument();
-    });
+    renderWithRedux(<CharacterDetails />);
 
     const closeButton = screen.getByRole('button', { name: /×/i });
     expect(closeButton).toBeInTheDocument();
