@@ -1,50 +1,58 @@
-# React + TypeScript + Vite
+# Rick and Morty App
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+[![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)](https://reactjs.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![Vite](https://img.shields.io/badge/Vite-646CFF?style=for-the-badge&logo=vite&logoColor=white)](https://vitejs.dev/)
 
-Currently, two official plugins are available:
+This project is a React application built with Vite, TypeScript, and Redux Toolkit that allows users to search for [Rick and Morty](https://en.wikipedia.org/wiki/Rick_and_Morty) characters and view their details.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+It is a task for [RS School React course](https://rs.school/)
 
-## Expanding the ESLint configuration
+## 🚀 Features
 
-If you are developing a production application, we recommend updating the configuration to enable type aware lint rules:
+- 🔍 Search for Rick and Morty characters
+- 👤 View character details
+- 📊 Select and download character data as CSV
+- 📄 Pagination for search results
+- 🛡️ Error boundary handling
 
-- Configure the top-level `parserOptions` property like this:
+## 🛠️ Technology Stack
 
-```js
-export default tseslint.config({
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-});
+- **Frontend**: React + TypeScript + Vite
+- **State Management**: Redux Toolkit (RTK)
+- **API**: RTK Query for data fetching
+- **Routing**: React Router
+- **Testing**: Vitest
+
+## 📋 Prerequisites
+
+Before you begin, ensure you have:
+- Node.js (v18 or later)
+- npm
+
+## 🚀 Getting Started
+
+```bash
+# Clone the repository
+git clone https://github.com/halyna-stehnii/rs-react-app.git
+cd rs-react-app
+
+# Install dependencies
+npm install
+
+# Start the development server
+npm run dev
 ```
 
-- Replace `tseslint.configs.recommended` to `tseslint.configs.recommendedTypeChecked` or `tseslint.configs.strictTypeChecked`
-- Optionally add `...tseslint.configs.stylisticTypeChecked`
-- Install [eslint-plugin-react](https://github.com/jsx-eslint/eslint-plugin-react) and update the config:
+## 🐞 Testing
 
-```js
-// eslint.config.js
-import react from 'eslint-plugin-react';
+```bash
+# Run tests
+npm test
 
-export default tseslint.config({
-  // Set the react version
-  settings: { react: { version: '18.3' } },
-  plugins: {
-    // Add the react plugin
-    react,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended rules
-    ...react.configs.recommended.rules,
-    ...react.configs['jsx-runtime'].rules,
-  },
-});
+# Run tests with UI
+npm run test:ui
+
+# Run tests with coverage
+npm run test:coverage
 ```
