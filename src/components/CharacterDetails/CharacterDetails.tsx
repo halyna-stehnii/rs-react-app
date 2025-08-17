@@ -1,10 +1,13 @@
-import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
+'use client';
+
+import { useSearchParams, useRouter } from 'next/navigation';
 import { useGetCharacterByIdQuery } from '../../services/rickAndMortyApi';
 
 const CharacterDetails = () => {
-  const { characterId } = useParams();
-  const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
+  const characterId = searchParams?.get('characterId');
 
   const {
     data: character,
@@ -16,13 +19,14 @@ const CharacterDetails = () => {
   });
 
   const handleClose = () => {
-    const params = new URLSearchParams(searchParams);
-    params.delete('details');
-
-    navigate({
-      pathname: '/',
-      search: params.toString(),
-    });
+    if (searchParams) {
+      const params = new URLSearchParams(searchParams);
+      params.delete('characterId');
+      const newUrl = params.toString() ? `/?${params.toString()}` : '/';
+      router.push(newUrl);
+    } else {
+      router.push('/');
+    }
   };
 
   const isLoadingData = isLoading || isFetching;

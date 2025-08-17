@@ -1,20 +1,26 @@
+'use client';
+
 import { useState, ChangeEvent } from 'react';
-import { Outlet, useNavigate } from 'react-router-dom';
-import SearchResults from './components/SearchResults/SearchResults';
-import Search from './components/Search/Search';
-import SelectedItemsFlyout from './components/SelectedItemsFlyout/SelectedItemsFlyout';
-import useSearchQuery from './hooks/useSearchQuery';
+import { useSearchParams, useRouter } from 'next/navigation';
+import SearchResults from '../src/components/SearchResults/SearchResults';
+import Search from '../src/components/Search/Search';
+import SelectedItemsFlyout from '../src/components/SelectedItemsFlyout/SelectedItemsFlyout';
+import CharacterDetails from '../src/components/CharacterDetails/CharacterDetails';
+import useSearchQuery from '../src/hooks/useSearchQuery';
 import {
   useGetCharactersQuery,
   useInvalidateCacheMutation,
-} from './services/rickAndMortyApi';
-import { SearchResult } from './model/types';
-import './App.css';
-import './components/CharacterDetails/CharacterDetails.css';
+} from '../src/services/rickAndMortyApi';
+import { SearchResult } from '../src/model/types';
+import '../src/App.css';
+import '../src/components/CharacterDetails/CharacterDetails.css';
 
-const AppContent = () => {
-  const navigate = useNavigate();
+export default function HomePage() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const [hasError, setHasError] = useState(false);
+
+  const selectedCharacterId = searchParams?.get('characterId');
 
   const {
     searchTerm,
@@ -59,10 +65,19 @@ const AppContent = () => {
   };
 
   const handleCharacterSelect = (characterId: string) => {
-    navigate(`/character/${characterId}?page=${currentPage}`);
+    if (searchParams) {
+      const params = new URLSearchParams(searchParams);
+      params.set('characterId', characterId);
+      params.set('page', currentPage.toString());
+      router.push(`/?${params.toString()}`);
+    } else {
+      const params = new URLSearchParams();
+      params.set('characterId', characterId);
+      params.set('page', currentPage.toString());
+      router.push(`/?${params.toString()}`);
+    }
   };
 
-  // Handle manual refresh - force refetch and invalidate cache
   const handleRefresh = async () => {
     try {
       await invalidateCache(undefined);
@@ -125,7 +140,8 @@ const AppContent = () => {
             />
           )}
         </div>
-        <Outlet />
+
+        {selectedCharacterId && <CharacterDetails />}
       </div>
 
       <button
@@ -138,10 +154,4 @@ const AppContent = () => {
       <SelectedItemsFlyout />
     </div>
   );
-};
-
-const App = () => {
-  return <AppContent />;
-};
-
-export default App;
+}
