@@ -183,14 +183,8 @@ export default function ClientHomePage({
               <p>Loading character data...</p>
             </div>
           ) : charactersError ? (
-            <div className="error-message">
-              <h3>Error loading data</h3>
-              <p>
-                {charactersError instanceof Error
-                  ? charactersError.message
-                  : 'Unknown error occurred'}
-              </p>
-              <button onClick={handleRefresh}>Try Again</button>
+            <div>
+              <div className="no-results-message">No results</div>
             </div>
           ) : searchResults.results.length === 0 ? (
             <div className="no-results">
