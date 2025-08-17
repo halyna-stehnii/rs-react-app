@@ -4,6 +4,7 @@ import {
   toggleCharacterSelection,
   selectSelectedCharacters,
 } from '../../redux/charactersSlice';
+import Image from 'next/image';
 
 interface CardProps {
   character: Person;
@@ -38,9 +39,14 @@ const Card = ({ character, onClick }: CardProps) => {
         />
       </div>
       <div className="character-image">
-        <img
-          src={character.image || 'no-img.png'}
-          alt={character.name || 'No data'}
+        <Image
+          src={character.image || '/no-img.png'}
+          alt={character.name}
+          width={300}
+          height={300}
+          className="character-image"
+          placeholder="blur"
+          blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQ..."
         />
       </div>
       <div className="character-info">

@@ -12,8 +12,8 @@ export const store = configureStore({
     getDefaultMiddleware().concat(rickAndMortyApi.middleware),
 });
 
-// Optional, but required for refetchOnFocus/refetchOnReconnect behaviors
 setupListeners(store.dispatch);
 
 export type RootState = ReturnType<typeof store.getState>;
 export type AppDispatch = typeof store.dispatch;
+export type AppStore = typeof store;

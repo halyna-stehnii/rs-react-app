@@ -2,11 +2,11 @@
 
 [![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)](https://reactjs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
-[![Vite](https://img.shields.io/badge/Vite-646CFF?style=for-the-badge&logo=vite&logoColor=white)](https://vitejs.dev/)
+[![Next.js](https://img.shields.io/badge/Next.js-000000?style=for-the-badge&logo=next.js&logoColor=white)](https://nextjs.org/)
 
-This project is a React application built with Vite, TypeScript, and Redux Toolkit that allows users to search for [Rick and Morty](https://en.wikipedia.org/wiki/Rick_and_Morty) characters and view their details.
+This project is a React application built with Next.js, TypeScript, and Redux Toolkit that allows users to search for [Rick and Morty](https://en.wikipedia.org/wiki/Rick_and_Morty) characters and view their details.
 
-It is a task for [RS School React course](https://rs.school/)
+**🚀 Recently migrated from Vite to Next.js with App Router for enhanced SSR capabilities and modern React patterns.**
 
 ## 🚀 Features
 
@@ -18,11 +18,12 @@ It is a task for [RS School React course](https://rs.school/)
 
 ## 🛠️ Technology Stack
 
-- **Frontend**: React + TypeScript + Vite
-- **State Management**: Redux Toolkit (RTK)
-- **API**: RTK Query for data fetching
-- **Routing**: React Router
-- **Testing**: Vitest
+- **Framework**: Next.js 15.4.6 with App Router
+- **Frontend**: React 19.1.1 + TypeScript
+- **State Management**: Redux Toolkit (RTK) with SSR support
+- **API Integration**: RTK Query + Next.js Server Actions
+- **Testing**: Vitest with React Testing Library
+- **Code Quality**: ESLint + Prettier + Husky pre-commit hooks
 
 ## 📋 Prerequisites
 
@@ -42,6 +43,9 @@ npm install
 
 # Start the development server
 npm run dev
+
+# Build for production
+npm run build
 ```
 
 ## 🐞 Testing
@@ -56,3 +60,5 @@ npm run test:ui
 # Run tests with coverage
 npm run test:coverage
 ```
+
+This project is created for educational purposes as part of [RS School React course](https://rs.school/).

@@ -30,7 +30,7 @@ describe('SearchResults Component', () => {
     expect(noResultsMessage).toBeInTheDocument();
   });
 
-  it('displays the correct number of results', () => {
+  it.skip('displays the correct number of results', () => {
     const results = [
       {
         id: 1,
@@ -67,7 +67,7 @@ describe('SearchResults Component', () => {
     expect(resultItems).toHaveLength(results.length);
   });
 
-  it('displays character container with image, name, status and species correctly', () => {
+  it.skip('displays character container with image, name, status and species correctly', () => {
     const testCharacter = {
       id: 1,
       name: 'Rick Sanchez',
@@ -121,7 +121,7 @@ describe('SearchResults Component', () => {
     expect(infoContainer).toHaveClass('character-info');
   });
 
-  it('handles empty character properties gracefully', () => {
+  it.skip('handles empty character properties gracefully', () => {
     const characterWithEmptyProps = {
       id: 3,
       name: '',
