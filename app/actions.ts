@@ -1,5 +1,7 @@
 'use server';
 
+import fs from 'fs';
+import path from 'path';
 import { SearchResult, Person } from '../src/model/types';
 
 const BASE_URL = 'https://rickandmortyapi.com/api';
@@ -76,4 +78,11 @@ export async function getCharacterById(id: string): Promise<Person | null> {
 
 export async function getInitialCharacters(): Promise<SearchResult> {
   return getCharacters();
+}
+
+export async function generateCSVReport(): Promise<string> {
+  const csvPath = path.join(process.cwd(), 'data', 'characters.csv');
+  const csvContent = await fs.promises.readFile(csvPath, 'utf-8');
+
+  return csvContent;
 }
