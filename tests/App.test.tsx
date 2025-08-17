@@ -19,6 +19,22 @@ vi.mock('../src/hooks/useSearchQuery', () => ({
   default: (...args: unknown[]) => mockUseSearchQuery(...args),
 }));
 
+const mockUseGetCharactersQuery = vi.fn();
+const mockUseInvalidateCacheMutation = vi.fn();
+
+vi.mock('../src/services/rickAndMortyApi', () => ({
+  rickAndMortyApi: {
+    reducerPath: 'rickAndMortyApi',
+    reducer: (state = {}) => state,
+    middleware:
+      () => (next: (action: unknown) => unknown) => (action: unknown) =>
+        next(action),
+  },
+  useGetCharactersQuery: (...args: unknown[]) =>
+    mockUseGetCharactersQuery(...args),
+  useInvalidateCacheMutation: () => mockUseInvalidateCacheMutation(),
+}));
+
 const initialReduxState = {
   characters: {
     selectedCharacters: {},
@@ -55,7 +71,7 @@ vi.mock('../src/components/SearchResults/SearchResults', () => {
             }
           >
             <img src={character.image} alt={character.name} />
-            <div>{character.name}</div>
+            <div>Name: {character.name}</div>
             <div>Status: {character.status}</div>
             <div>Species: {character.species}</div>
           </div>
@@ -92,17 +108,14 @@ vi.mock('../src/components/Search/Search', () => ({
   },
 }));
 
-declare const global: {
-  fetch: (input: RequestInfo | URL, init?: RequestInit) => Promise<Response>;
-};
-
-describe.skip('App Component', () => {
+describe('App Component', () => {
   const mockFetchResponse = {
     count: 2,
     next: null,
     previous: null,
     results: [
       {
+        id: 1,
         name: 'Rick Sanchez',
         status: 'Alive',
         species: 'Human',
@@ -110,6 +123,7 @@ describe.skip('App Component', () => {
         episode: ['episode1', 'episode2'],
       },
       {
+        id: 2,
         name: 'Morty Smith',
         status: 'Alive',
         species: 'Human',
@@ -120,22 +134,21 @@ describe.skip('App Component', () => {
   };
 
   beforeEach(() => {
-    global.fetch = vi.fn().mockImplementation(() =>
-      Promise.resolve({
-        ok: true,
-        json: () => Promise.resolve(mockFetchResponse),
-        clone: function () {
-          return {
-            ok: this.ok,
-            json: this.json,
-            clone: this.clone,
-          };
-        },
-      })
-    );
-
     localStorage.clear();
     vi.clearAllMocks();
+
+    mockUseGetCharactersQuery.mockReturnValue({
+      data: mockFetchResponse,
+      error: null,
+      isLoading: false,
+      isFetching: false,
+      refetch: vi.fn(),
+    });
+
+    mockUseInvalidateCacheMutation.mockReturnValue([
+      vi.fn(),
+      { isLoading: false },
+    ]);
 
     mockUseSearchQuery.mockImplementation(
       (storageKey: string, defaultValue: string) => {
@@ -168,20 +181,16 @@ describe.skip('App Component', () => {
     renderWithRedux(<App />, { preloadedState: initialReduxState });
 
     await waitFor(() => {
-      expect(global.fetch).toHaveBeenCalledTimes(1);
-
-      const fetchCall = vi.mocked(global.fetch).mock.calls[0][0];
-      const requestUrl =
-        fetchCall instanceof Request ? fetchCall.url : String(fetchCall);
-      expect(requestUrl).toContain(
-        'https://rickandmortyapi.com/api/character/'
-      );
-      expect(requestUrl).toContain('name=');
-      expect(requestUrl).toContain('page=1');
+      expect(mockUseGetCharactersQuery).toHaveBeenCalledWith({
+        name: '',
+        page: 1,
+      });
     });
 
-    expect(await screen.findByText(/rick sanchez/i)).toBeInTheDocument();
-    expect(await screen.findByText(/morty smith/i)).toBeInTheDocument();
+    expect(
+      await screen.findByText(/name:\s*rick sanchez/i)
+    ).toBeInTheDocument();
+    expect(await screen.findByText(/name:\s*morty smith/i)).toBeInTheDocument();
   });
 
   it('should load saved search term from localStorage and make API call with it', async () => {
@@ -202,35 +211,25 @@ describe.skip('App Component', () => {
     renderWithRedux(<App />, { preloadedState: initialReduxState });
 
     await waitFor(() => {
-      expect(global.fetch).toHaveBeenCalledTimes(1);
-
-      const fetchCall = vi.mocked(global.fetch).mock.calls[0][0];
-      const requestUrl =
-        fetchCall instanceof Request ? fetchCall.url : String(fetchCall);
-      expect(requestUrl).toContain(
-        'https://rickandmortyapi.com/api/character/'
-      );
-      expect(requestUrl).toContain(`name=${savedSearchTerm}`);
-      expect(requestUrl).toContain('page=1');
+      expect(mockUseGetCharactersQuery).toHaveBeenCalledWith({
+        name: savedSearchTerm,
+        page: 1,
+      });
     });
 
-    expect(await screen.findByText(/rick sanchez/i)).toBeInTheDocument();
+    expect(
+      await screen.findByText(/name:\s*rick sanchez/i)
+    ).toBeInTheDocument();
   });
 
   it('should show loader when fetching data', () => {
-    global.fetch = vi.fn().mockImplementation(
-      () =>
-        new Promise((resolve) => {
-          setTimeout(() => {
-            const response = {
-              ok: true,
-              json: () => Promise.resolve(mockFetchResponse),
-              clone: () => ({ ...response }),
-            };
-            resolve(response);
-          }, 100);
-        })
-    );
+    mockUseGetCharactersQuery.mockReturnValue({
+      data: mockFetchResponse,
+      error: null,
+      isLoading: true,
+      isFetching: false,
+      refetch: vi.fn(),
+    });
 
     renderWithRedux(<App />, { preloadedState: initialReduxState });
 
@@ -239,32 +238,40 @@ describe.skip('App Component', () => {
   });
 
   it('should display loading indicator during API calls and hide it after completion', async () => {
-    const fetchSpy = vi.fn().mockImplementation(() => {
-      return new Promise((resolve) => {
-        setTimeout(() => {
-          const response = {
-            ok: true,
-            json: () => Promise.resolve(mockFetchResponse),
-            clone: () => ({ ...response }),
-          };
-          resolve(response);
-        }, 10);
-      });
+    mockUseGetCharactersQuery.mockReturnValue({
+      data: undefined,
+      error: null,
+      isLoading: true,
+      isFetching: false,
+      refetch: vi.fn(),
     });
 
-    global.fetch = fetchSpy;
-
-    renderWithRedux(<App />, { preloadedState: initialReduxState });
+    const { rerender } = renderWithRedux(<App />, {
+      preloadedState: initialReduxState,
+    });
 
     const loaderElements = document.getElementsByClassName('loader');
     expect(loaderElements.length).toBeGreaterThan(0);
+
+    // Simulate data loaded
+    mockUseGetCharactersQuery.mockReturnValue({
+      data: mockFetchResponse,
+      error: null,
+      isLoading: false,
+      isFetching: false,
+      refetch: vi.fn(),
+    });
+
+    rerender(<App />);
 
     await waitFor(() => {
       const loaderElements = document.getElementsByClassName('loader');
       expect(loaderElements.length).toBe(0);
     });
 
-    expect(await screen.findByText(/rick sanchez/i)).toBeInTheDocument();
+    expect(
+      await screen.findByText(/name:\s*rick sanchez/i)
+    ).toBeInTheDocument();
   });
 
   it('should handle search button clicks with proper loading states', async () => {
@@ -282,21 +289,16 @@ describe.skip('App Component', () => {
       searchTerm: 'Summer',
       storedSearchTerm: '',
       currentPage: 1,
-      handleSearchInputChange: mockUpdateSearchTerm, // This is what we're testing
+      handleSearchInputChange: mockUpdateSearchTerm,
       handleSearch: mockExecuteSearch,
       handlePageChange: vi.fn(),
     });
 
-    renderWithRedux(<App />, { preloadedState: initialReduxState });
-
-    await waitFor(() => {
-      const loaderElements = document.getElementsByClassName('loader');
-      expect(loaderElements.length).toBe(0);
-    });
-
     const summerResponse = {
       info: { count: 1, pages: 1, next: null, prev: null },
-      ...mockFetchResponse,
+      count: 1,
+      next: null,
+      previous: null,
       results: [
         {
           id: 3,
@@ -309,31 +311,45 @@ describe.skip('App Component', () => {
       ],
     };
 
-    const fetchSpy = vi.fn().mockImplementation(() => {
-      const response = {
-        ok: true,
-        json: () => Promise.resolve(summerResponse),
-        clone: () => ({ ...response }),
-      };
-      return Promise.resolve(response);
+    mockUseGetCharactersQuery.mockReturnValue({
+      data: mockFetchResponse,
+      error: null,
+      isLoading: false,
+      isFetching: false,
+      refetch: vi.fn(),
     });
 
-    global.fetch = fetchSpy;
-
-    const searchButton = screen.getByRole('button', { name: 'Search' });
-    fireEvent.click(searchButton);
-
-    await waitFor(() => {
-      expect(fetchSpy).toHaveBeenCalled();
+    const { rerender } = renderWithRedux(<App />, {
+      preloadedState: initialReduxState,
     });
 
     await waitFor(() => {
       const loaderElements = document.getElementsByClassName('loader');
       expect(loaderElements.length).toBe(0);
     });
+    mockUseGetCharactersQuery.mockReturnValue({
+      data: summerResponse,
+      error: null,
+      isLoading: false,
+      isFetching: false,
+      refetch: vi.fn(),
+    });
 
-    expect(await screen.findByText(/summer smith/i)).toBeInTheDocument();
-    expect(screen.queryByText(/rick sanchez/i)).not.toBeInTheDocument();
+    const searchButton = screen.getByRole('button', { name: 'Search' });
+    fireEvent.click(searchButton);
+
+    expect(mockExecuteSearch).toHaveBeenCalled();
+    rerender(<App />);
+
+    await waitFor(() => {
+      const loaderElements = document.getElementsByClassName('loader');
+      expect(loaderElements.length).toBe(0);
+    });
+
+    expect(
+      await screen.findByText(/name:\s*summer smith/i)
+    ).toBeInTheDocument();
+    expect(screen.queryByText(/name:\s*rick sanchez/i)).not.toBeInTheDocument();
   });
 
   it('should successfully fetch and display data with all expected properties', async () => {
@@ -365,37 +381,30 @@ describe.skip('App Component', () => {
       handlePageChange: vi.fn(),
     });
 
-    global.fetch = vi.fn().mockImplementation(() => {
-      const response = {
-        ok: true,
-        json: () => Promise.resolve(detailedMockResponse),
-        clone: () => ({ ...response }),
-      };
-      return Promise.resolve(response);
+    mockUseGetCharactersQuery.mockReturnValue({
+      data: detailedMockResponse,
+      error: null,
+      isLoading: false,
+      isFetching: false,
+      refetch: vi.fn(),
     });
 
     renderWithRedux(<App />, { preloadedState: initialReduxState });
 
     await waitFor(() => {
-      expect(global.fetch).toHaveBeenCalledTimes(1);
-
-      const fetchCall = vi.mocked(global.fetch).mock.calls[0][0];
-      const requestUrl =
-        fetchCall instanceof Request ? fetchCall.url : String(fetchCall);
-      expect(requestUrl).toContain(
-        'https://rickandmortyapi.com/api/character/'
-      );
-      expect(requestUrl).toContain('name=');
-      expect(requestUrl).toContain('page=1');
+      expect(mockUseGetCharactersQuery).toHaveBeenCalledWith({
+        name: '',
+        page: 1,
+      });
     });
 
-    expect(await screen.findByText(/Beth Smith/i)).toBeInTheDocument();
+    expect(await screen.findByText(/name:\s*beth smith/i)).toBeInTheDocument();
 
     const characterImage = screen.getByAltText('Beth Smith');
     expect(characterImage).toBeInTheDocument();
     expect(characterImage).toHaveAttribute('src', 'beth.jpg');
 
-    expect(global.fetch).toHaveBeenCalledTimes(1);
+    expect(mockUseGetCharactersQuery).toHaveBeenCalledTimes(1);
     expect(document.getElementsByClassName('loader').length).toBe(0);
   });
 });

@@ -22,5 +22,10 @@
     "noFallthroughCasesInSwitch": true,
     "noUncheckedSideEffectImports": true
   },
-  "include": ["src", "tests/App.test.tsx", "tests/components/Search.test.tsx", "tests/components/SearchResults.test.tsx"]
+  "include": [
+    "src",
+    "tests/App.test.tsx",
+    "tests/components/Search.test.tsx",
+    "tests/components/SearchResults.test.tsx"
+  ]
 }
