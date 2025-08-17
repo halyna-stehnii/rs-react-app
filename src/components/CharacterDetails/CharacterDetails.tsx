@@ -2,6 +2,7 @@
 
 import { useSearchParams, useRouter } from 'next/navigation';
 import { useGetCharacterByIdQuery } from '../../services/rickAndMortyApi';
+import Image from 'next/image';
 
 const CharacterDetails = () => {
   const router = useRouter();
@@ -70,9 +71,11 @@ const CharacterDetails = () => {
         <h2>{character.name}</h2>
       </div>
       <div className="character-details">
-        <img
+        <Image
           src={character.image || '/no-img.png'}
           alt={character.name}
+          width={600}
+          height={600}
           className="character-details-image"
         />
         <div className="character-info">
