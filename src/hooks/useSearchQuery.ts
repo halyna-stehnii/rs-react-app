@@ -1,6 +1,8 @@
+'use client';
+
 import { useState, useEffect } from 'react';
+import { useSearchParams, useRouter } from 'next/navigation';
 import useLocalStorage from './useLocalStorage';
-import { useSearchParams } from 'react-router-dom';
 
 function useSearchQuery(storageKey = 'searchTerm', defaultValue = '') {
   const [storedSearchTerm, setStoredSearchTerm] = useLocalStorage<string>(
@@ -10,8 +12,10 @@ function useSearchQuery(storageKey = 'searchTerm', defaultValue = '') {
 
   const [searchTerm, setSearchTerm] = useState<string>(storedSearchTerm);
 
-  const [searchParams, setSearchParams] = useSearchParams();
-  const pageParam = searchParams.get('page');
+  const searchParams = useSearchParams();
+  const router = useRouter();
+
+  const pageParam = searchParams?.get('page');
   const [currentPage, setCurrentPage] = useState(
     pageParam ? parseInt(pageParam, 10) : 1
   );
@@ -29,9 +33,9 @@ function useSearchQuery(storageKey = 'searchTerm', defaultValue = '') {
     const trimmedSearchTerm = searchTerm.trim();
     setCurrentPage(1);
 
-    const newSearchParams = new URLSearchParams();
-    newSearchParams.set('page', '1');
-    setSearchParams(newSearchParams);
+    const params = new URLSearchParams();
+    params.set('page', '1');
+    router.push(`/?${params.toString()}`);
 
     if (trimmedSearchTerm) {
       setStoredSearchTerm(trimmedSearchTerm);
@@ -46,9 +50,10 @@ function useSearchQuery(storageKey = 'searchTerm', defaultValue = '') {
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
 
-    const newSearchParams = new URLSearchParams(searchParams);
-    newSearchParams.set('page', page.toString());
-    setSearchParams(newSearchParams);
+    // Update URL with new page
+    const params = new URLSearchParams(searchParams?.toString() || '');
+    params.set('page', page.toString());
+    router.push(`/?${params.toString()}`);
 
     return {
       searchTerm: storedSearchTerm,
